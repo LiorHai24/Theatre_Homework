@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Between, Not } from 'typeorm';
 import { Showtime } from './entities/showtime.entity';
 import { Movie } from '../movies/entities/movie.entity';
-import { Theater } from '../movies/entities/theater.entity';
+import { Theater } from './entities/theater.entity';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 
 @Injectable()
