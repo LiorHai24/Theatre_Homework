@@ -15,11 +15,11 @@ export class Movie {
   @Column()
   duration: number; // Duration in minutes
 
-  @Column({ type: 'float' })
+  @Column('decimal', { precision: 2, scale: 1 })
   rating: number; // Rating out of 5
 
   @Column()
-  releaseYear: number;
+  release_year: number;
 
   @OneToMany(() => Showtime, showtime => showtime.movie)
   showtimes: Showtime[];

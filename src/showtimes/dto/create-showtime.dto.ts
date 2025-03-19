@@ -1,33 +1,40 @@
-import { IsNotEmpty, IsNumber, IsDate, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsDate, Min, Max, IsPositive, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateShowtimeDto {
-  @IsNotEmpty()
-  @IsNumber()
+  @IsNotEmpty({ message: 'Movie ID is required' })
+  @IsNumber({}, { message: 'Movie ID must be a number' })
+  @IsPositive({ message: 'Movie ID must be a positive number' })
   movieId: number;
 
-  @IsNotEmpty()
-  @IsNumber()
+  @IsNotEmpty({ message: 'Theater ID is required' })
+  @IsNumber({}, { message: 'Theater ID must be a number' })
+  @IsPositive({ message: 'Theater ID must be a positive number' })
   theaterId: number;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Start time is required' })
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'Start time must be a valid date' })
   startTime: Date;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'End time is required' })
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'End time must be a valid date' })
+  @ValidateIf((o) => o.startTime !== undefined, {
+    message: 'End time must be after start time'
+  })
   endTime: Date;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
+  @IsNotEmpty({ message: 'Price is required' })
+  @IsNumber({}, { message: 'Price must be a number' })
+  @IsPositive({ message: 'Price must be a positive number' })
+  @Min(0, { message: 'Price cannot be negative' })
   price: number;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
+  @IsNotEmpty({ message: 'Available seats is required' })
+  @IsNumber({}, { message: 'Available seats must be a number' })
+  @IsPositive({ message: 'Available seats must be a positive number' })
+  @Min(0, { message: 'Available seats cannot be negative' })
+  @Max(100, { message: 'Available seats cannot exceed 100' })
   availableSeats: number;
 } 

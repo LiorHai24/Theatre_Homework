@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie } from './entities/movie.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
+import { UpdateMovieDto } from './dto/update-movie.dto';
 
 @Injectable()
 export class MoviesService {
@@ -17,19 +18,35 @@ export class MoviesService {
   }
 
   findAll(): Promise<Movie[]> {
-    return this.movieRepository.find({
-      relations: ['showtimes'],
-    });
+    return this.movieRepository.find();
   }
 
-  findOne(id: number): Promise<Movie | null> {
-    return this.movieRepository.findOne({
+  async findOne(id: number): Promise<Movie> {
+    const movie = await this.movieRepository.findOne({
       where: { id },
-      relations: ['showtimes'],
     });
+
+    if (!movie) {
+      throw new NotFoundException(`Movie with ID ${id} not found`);
+    }
+
+    return movie;
   }
 
-  async remove(id: number): Promise<void> {
-    await this.movieRepository.delete(id);
+  async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
+    const movie = await this.findOne(id);
+    
+    // Update only the fields that are provided
+    Object.assign(movie, updateMovieDto);
+    
+    return this.movieRepository.save(movie);
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    const result = await this.movieRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Movie with ID ${id} not found`);
+    }
+    return { message: `Movie with ID ${id} has been successfully deleted` };
   }
 }
