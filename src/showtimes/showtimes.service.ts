@@ -5,6 +5,7 @@ import { Showtime } from './entities/showtime.entity';
 import { Movie } from '../movies/entities/movie.entity';
 import { Theater } from './entities/theater.entity';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
+import { CreateTheaterDto } from './dto/create-theater.dto';
 
 @Injectable()
 export class ShowtimesService {
@@ -18,39 +19,41 @@ export class ShowtimesService {
   ) {}
 
   async create(createShowtimeDto: CreateShowtimeDto): Promise<Showtime> {
-    const [movie, theater] = await Promise.all([
-      this.movieRepository.findOne({
-        where: { id: createShowtimeDto.movieId },
-      }),
-      this.theaterRepository.findOne({
-        where: { id: createShowtimeDto.theaterId },
-      }),
-    ]);
-
+    const movie = await this.movieRepository.findOne({ where: { id: createShowtimeDto.movie } });
     if (!movie) {
-      throw new NotFoundException(`Movie with ID ${createShowtimeDto.movieId} not found`);
+      throw new NotFoundException(`Movie with ID ${createShowtimeDto.movie} not found`);
     }
 
+    const theater = await this.theaterRepository.findOne({ where: { id: createShowtimeDto.theater } });
     if (!theater) {
-      throw new NotFoundException(`Theater with ID ${createShowtimeDto.theaterId} not found`);
+      throw new NotFoundException(`Theater with ID ${createShowtimeDto.theater} not found`);
     }
 
     // Check for overlapping showtimes in the same theater
     const overlappingShowtime = await this.showtimeRepository.findOne({
-      where: {
-        theater: { id: theater.id },
-        startTime: Between(createShowtimeDto.startTime, createShowtimeDto.endTime),
-      },
+      where: [
+        {
+          theater: { id: createShowtimeDto.theater },
+          start_time: createShowtimeDto.start_time,
+        },
+        {
+          theater: { id: createShowtimeDto.theater },
+          end_time: createShowtimeDto.end_time,
+        },
+      ],
     });
 
     if (overlappingShowtime) {
-      throw new BadRequestException('There is already a showtime scheduled for this theater during this time period');
+      throw new BadRequestException('There is already a showtime scheduled for this time in this theater');
     }
 
     const showtime = this.showtimeRepository.create({
-      ...createShowtimeDto,
       movie,
       theater,
+      start_time: createShowtimeDto.start_time,
+      end_time: createShowtimeDto.end_time,
+      price: createShowtimeDto.price,
+      availableSeats: theater.capacity,
     });
 
     return this.showtimeRepository.save(showtime);
@@ -59,16 +62,15 @@ export class ShowtimesService {
   async findByMovie(movieId: number): Promise<Showtime[]> {
     return this.showtimeRepository.find({
       where: { movie: { id: movieId } },
-      relations: ['movie', 'theater'],
+      relations: ['theater'],
     });
   }
 
   async findUpcoming(): Promise<Showtime[]> {
     const now = new Date();
     return this.showtimeRepository.find({
-      where: { startTime: MoreThan(now) },
+      where: { start_time: now },
       relations: ['movie', 'theater'],
-      order: { startTime: 'ASC' },
     });
   }
 
@@ -77,43 +79,68 @@ export class ShowtimesService {
       where: { id },
       relations: ['movie', 'theater'],
     });
-
     if (!showtime) {
       throw new NotFoundException(`Showtime with ID ${id} not found`);
     }
-
     return showtime;
   }
 
-  async update(id: number, updateData: Partial<CreateShowtimeDto>): Promise<Showtime> {
+  async update(id: number, updateShowtimeDto: Partial<CreateShowtimeDto>): Promise<Showtime> {
     const showtime = await this.findOne(id);
 
-    if (updateData.theaterId) {
-      const theater = await this.theaterRepository.findOne({
-        where: { id: updateData.theaterId },
-      });
-
-      if (!theater) {
-        throw new NotFoundException(`Theater with ID ${updateData.theaterId} not found`);
+    if (updateShowtimeDto.theater && updateShowtimeDto.theater !== showtime.theater.id) {
+      const newTheater = await this.theaterRepository.findOne({ where: { id: updateShowtimeDto.theater } });
+      if (!newTheater) {
+        throw new NotFoundException(`Theater with ID ${updateShowtimeDto.theater} not found`);
       }
 
       // Check for overlapping showtimes in the new theater
       const overlappingShowtime = await this.showtimeRepository.findOne({
-        where: {
-          theater: { id: theater.id },
-          startTime: Between(updateData.startTime || showtime.startTime, updateData.endTime || showtime.endTime),
-          id: Not(id), // Exclude current showtime
-        },
+        where: [
+          {
+            theater: { id: updateShowtimeDto.theater },
+            start_time: updateShowtimeDto.start_time || showtime.start_time,
+          },
+          {
+            theater: { id: updateShowtimeDto.theater },
+            end_time: updateShowtimeDto.end_time || showtime.end_time,
+          },
+        ],
       });
 
       if (overlappingShowtime) {
-        throw new BadRequestException('There is already a showtime scheduled for this theater during this time period');
+        throw new BadRequestException('There is already a showtime scheduled for this time in this theater');
       }
+    }
 
+    if (updateShowtimeDto.movie) {
+      const movie = await this.movieRepository.findOne({ where: { id: updateShowtimeDto.movie } });
+      if (!movie) {
+        throw new NotFoundException(`Movie with ID ${updateShowtimeDto.movie} not found`);
+      }
+      showtime.movie = movie;
+    }
+
+    if (updateShowtimeDto.theater) {
+      const theater = await this.theaterRepository.findOne({ where: { id: updateShowtimeDto.theater } });
+      if (!theater) {
+        throw new NotFoundException(`Theater with ID ${updateShowtimeDto.theater} not found`);
+      }
       showtime.theater = theater;
     }
 
-    Object.assign(showtime, updateData);
+    if (updateShowtimeDto.start_time) {
+      showtime.start_time = updateShowtimeDto.start_time;
+    }
+
+    if (updateShowtimeDto.end_time) {
+      showtime.end_time = updateShowtimeDto.end_time;
+    }
+
+    if (updateShowtimeDto.price) {
+      showtime.price = updateShowtimeDto.price;
+    }
+
     return this.showtimeRepository.save(showtime);
   }
 
@@ -122,5 +149,26 @@ export class ShowtimesService {
     if (result.affected === 0) {
       throw new NotFoundException(`Showtime with ID ${id} not found`);
     }
+  }
+
+  async createTheater(createTheaterDto: CreateTheaterDto): Promise<Theater> {
+    const capacity = createTheaterDto.rows * createTheaterDto.seatsPerRow;
+    const theater = this.theaterRepository.create({
+      ...createTheaterDto,
+      capacity,
+    });
+    return this.theaterRepository.save(theater);
+  }
+
+  async getTheaters(): Promise<Theater[]> {
+    return this.theaterRepository.find();
+  }
+
+  async getTheaterById(id: number): Promise<Theater> {
+    const theater = await this.theaterRepository.findOne({ where: { id } });
+    if (!theater) {
+      throw new NotFoundException(`Theater with ID ${id} not found`);
+    }
+    return theater;
   }
 }

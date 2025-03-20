@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Showtime } from './showtime.entity';
 
 @Entity()
@@ -7,11 +7,14 @@ export class Theater {
   id: number;
 
   @Column()
-  name: string;
+  capacity: number;
 
   @Column()
-  capacity: number;
+  rows: number;
+
+  @Column()
+  seatsPerRow: number;
 
   @OneToMany(() => Showtime, showtime => showtime.theater)
   showtimes: Showtime[];
-} 
+}

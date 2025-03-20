@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Movie } from '../../movies/entities/movie.entity';
 import { Theater } from './theater.entity';
 
@@ -13,21 +13,15 @@ export class Showtime {
   @ManyToOne(() => Theater, theater => theater.showtimes)
   theater: Theater;
 
-  @Column({ type: 'timestamp' })
-  startTime: Date;
-
-  @Column({ type: 'timestamp' })
-  endTime: Date;
+  @Column()
+  start_time: Date;
 
   @Column()
+  end_time: Date;
+
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
   @Column()
   availableSeats: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 } 

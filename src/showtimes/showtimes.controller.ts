@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { ShowtimesService } from './showtimes.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
+import { CreateTheaterDto } from './dto/create-theater.dto';
 import { Showtime } from './entities/showtime.entity';
+import { Theater } from './entities/theater.entity';
 
 @Controller('showtimes')
 export class ShowtimesController {
@@ -38,5 +40,20 @@ export class ShowtimesController {
   @Delete(':id')
   remove(@Param('id') id: number): Promise<void> {
     return this.showtimesService.remove(+id);
+  }
+
+  @Post('theater')
+  createTheater(@Body() createTheaterDto: CreateTheaterDto): Promise<Theater> {
+    return this.showtimesService.createTheater(createTheaterDto);
+  }
+
+  @Get('theaters')
+  getTheaters(): Promise<Theater[]> {
+    return this.showtimesService.getTheaters();
+  }
+
+  @Get('theater/:id')
+  getTheaterById(@Param('id') id: string): Promise<Theater> {
+    return this.showtimesService.getTheaterById(+id);
   }
 }
