@@ -29,22 +29,28 @@ export class ShowtimesService {
       throw new NotFoundException(`Theater with ID ${createShowtimeDto.theater} not found`);
     }
 
+    // Calculate duration in minutes from start and end time
+    const startTime = new Date(createShowtimeDto.start_time);
+    const endTime = new Date(createShowtimeDto.end_time);
+    const durationInMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+
+    // Check if duration matches movie duration
+    if (durationInMinutes !== movie.duration) {
+      throw new BadRequestException(
+        `Showtime duration (${durationInMinutes} minutes) does not match movie duration (${movie.duration} minutes)`
+      );
+    }
+
     // Check for overlapping showtimes in the same theater
     const overlappingShowtime = await this.showtimeRepository.findOne({
-      where: [
-        {
-          theater: { id: createShowtimeDto.theater },
-          start_time: createShowtimeDto.start_time,
-        },
-        {
-          theater: { id: createShowtimeDto.theater },
-          end_time: createShowtimeDto.end_time,
-        },
-      ],
+      where: {
+        theater: { id: createShowtimeDto.theater },
+        start_time: Between(createShowtimeDto.start_time, createShowtimeDto.end_time),
+      },
     });
 
     if (overlappingShowtime) {
-      throw new BadRequestException('There is already a showtime scheduled for this time in this theater');
+      throw new BadRequestException('There is already a showtime scheduled during this time period in this theater');
     }
 
     const showtime = this.showtimeRepository.create({
@@ -144,11 +150,12 @@ export class ShowtimesService {
     return this.showtimeRepository.save(showtime);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ message: string }> {
     const result = await this.showtimeRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Showtime with ID ${id} not found`);
     }
+    return { message: `Showtime with ID ${id} has been successfully deleted` };
   }
 
   async createTheater(createTheaterDto: CreateTheaterDto): Promise<Theater> {

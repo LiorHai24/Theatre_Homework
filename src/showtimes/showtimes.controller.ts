@@ -38,7 +38,7 @@ export class ShowtimesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number): Promise<void> {
+  remove(@Param('id') id: number): Promise<{ message: string }> {
     return this.showtimesService.remove(+id);
   }
 
