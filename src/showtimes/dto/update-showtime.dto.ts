@@ -26,4 +26,9 @@ export class UpdateShowtimeDto {
   @IsNumber({}, { message: 'Price must be a number' })
   @Min(0, { message: 'Price cannot be negative' })
   price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  availableSeats?: number;
 } 

@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MoviesModule } from './movies/movies.module';
 import { ShowtimesModule } from './showtimes/showtimes.module';
+import { TicketsModule } from './tickets/tickets.module';
 //import { ValidationPipe } from '@nestjs/common';
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ShowtimesModule } from './showtimes/showtimes.module';
     }),
     MoviesModule,
     ShowtimesModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

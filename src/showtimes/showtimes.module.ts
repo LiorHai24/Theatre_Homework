@@ -10,6 +10,6 @@ import { Movie } from '../movies/entities/movie.entity';
   imports: [TypeOrmModule.forFeature([Showtime, Theater, Movie])],
   controllers: [ShowtimesController],
   providers: [ShowtimesService],
-  exports: [ShowtimesService],
+  exports: [ShowtimesService, TypeOrmModule],
 })
 export class ShowtimesModule {}

@@ -27,6 +27,6 @@ export class CreateShowtimeDto {
 
   @IsNotEmpty({ message: 'Price is required' })
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Price must be a number with up to 2 decimal places' })
-  @Min(0, { message: 'Price cannot be negative' })
+  @IsPositive({ message: 'Price must be positive' })
   price: number;
 } 
