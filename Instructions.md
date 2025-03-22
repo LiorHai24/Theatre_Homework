@@ -229,14 +229,58 @@ The system includes comprehensive tests for all endpoints and business logic. Te
 - Data integrity
 
 
+## Prerequisites
+
+Make sure you have the following installed on your system before proceeding:
+
+- [Node.js (LTS version)](https://nodejs.org/) (includes npm)
+- [Docker & Docker Compose](https://www.docker.com/products/docker-desktop) (for running PostgreSQL locally)
+
+Verify installation:
+
+```bash
+# Check Node.js and npm versions
+$ node -v
+$ npm -v
+
+# Check Docker version (if using Docker)
+$ docker --version
+$ docker-compose --version
+
 ## Installation
+# Clone the repository
+$ git clone https://github.com/your-username/your-repo.git
+$ cd your-repo
 
-```bash
+# Install dependencies
 $ npm install
-```
 
-## Running the app
+#import the postgres image to docker
+$ docker pull postgres:latest
+# Start PostgreSQL using docker-compose (as defined in compose.yml)
 
-```bash
-# development
+$ docker-compose up -d
+
+##Running the app
+# Development mode
 $ npm run start
+
+# Watch mode
+$ npm run start:dev
+
+# Production mode
+$ npm run start:prod
+
+##Test
+
+# Unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# Test coverage
+$ npm run test:cov
+
+# Stop the database container
+$ docker-compose down
