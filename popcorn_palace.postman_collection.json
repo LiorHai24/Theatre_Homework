@@ -1,0 +1,658 @@
+{
+  "info": {
+    "name": "Popcorn Palace API",
+    "description": "Collection for testing Popcorn Palace movie theater API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/movies/all",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "all"]
+            },
+            "description": "Get all movies in the system"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/movies/all",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "all"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": [
+                {
+                  "id": 12345,
+                  "title": "Sample Movie Title 1",
+                  "genre": "Action",
+                  "duration": 120,
+                  "rating": 8.7,
+                  "release_year": 2025
+                },
+                {
+                  "id": 67890,
+                  "title": "Sample Movie Title 2",
+                  "genre": "Comedy",
+                  "duration": 90,
+                  "rating": 7.5,
+                  "release_year": 2024
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Add Movie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Sample Movie Title\",\n    \"genre\": \"Action\",\n    \"duration\": 120,\n    \"rating\": 8.7,\n    \"release_year\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/movies",
+              "host": ["{{base_url}}"],
+              "path": ["movies"]
+            },
+            "description": "Add a new movie to the system"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Sample Movie Title\",\n    \"genre\": \"Action\",\n    \"duration\": 120,\n    \"rating\": 8.7,\n    \"release_year\": 2025\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/movies",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "title": "Sample Movie Title",
+                "genre": "Action",
+                "duration": 120,
+                "rating": 8.7,
+                "release_year": 2025
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Movie Title\",\n    \"genre\": \"Action\",\n    \"duration\": 120,\n    \"rating\": 8.7,\n    \"release_year\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/movies/update/Sample Movie Title",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "update", "Sample Movie Title"]
+            },
+            "description": "Update an existing movie by title"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Updated Movie Title\",\n    \"genre\": \"Action\",\n    \"duration\": 120,\n    \"rating\": 8.7,\n    \"release_year\": 2025\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/movies/update/Sample Movie Title",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "update", "Sample Movie Title"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "title": "Updated Movie Title",
+                "genre": "Action",
+                "duration": 120,
+                "rating": 8.7,
+                "release_year": 2025
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Movie",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/movies/Sample Movie Title",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "Sample Movie Title"]
+            },
+            "description": "Delete a movie by title"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/movies/Sample Movie Title",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "Sample Movie Title"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "message": "Movie \"Sample Movie Title\" has been successfully deleted"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Showtimes",
+      "item": [
+        {
+          "name": "Create Theater",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Sample Theater\",\n    \"rows\": 10,\n    \"seatsPerRow\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/showtimes/theaters",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theaters"]
+            },
+            "description": "Create a new theater"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Sample Theater\",\n    \"rows\": 10,\n    \"seatsPerRow\": 15\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "name": "Sample Theater",
+                "rows": 10,
+                "seatsPerRow": 15
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Theaters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/showtimes/theaters",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theaters"]
+            },
+            "description": "Get all theaters"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": [
+                {
+                  "id": 1,
+                  "name": "Sample Theater",
+                  "rows": 10,
+                  "seatsPerRow": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Get Theater by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/showtimes/theaters/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theaters", "1"]
+            },
+            "description": "Get a specific theater by ID"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "name": "Sample Theater",
+                "rows": 10,
+                "seatsPerRow": 15
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Showtime by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/showtimes/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "1"]
+            },
+            "description": "Get a specific showtime by ID"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/showtimes/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "price": 50.2,
+                "movieId": 1,
+                "theater": "Sample Theater",
+                "startTime": "2025-02-14T11:47:46.125405Z",
+                "endTime": "2025-02-14T14:47:46.125405Z"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Showtime",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"price\": 20.2,\n    \"theater\": \"Sample Theater\",\n    \"startTime\": \"2025-02-14T11:47:46.125405Z\",\n    \"endTime\": \"2025-02-14T14:47:46.125405Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/showtimes",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes"]
+            },
+            "description": "Add a new showtime (requires theater to exist)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"movieId\": 1,\n    \"price\": 20.2,\n    \"theater\": \"Sample Theater\",\n    \"startTime\": \"2025-02-14T11:47:46.125405Z\",\n    \"endTime\": \"2025-02-14T14:47:46.125405Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "price": 50.2,
+                "movieId": 1,
+                "theater": "Sample Theater",
+                "startTime": "2025-02-14T11:47:46.125405Z",
+                "endTime": "2025-02-14T14:47:46.125405Z"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Showtime",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"price\": 50.2,\n    \"theater\": \"Sample Theater\",\n    \"startTime\": \"2025-02-14T11:47:46.125405Z\",\n    \"endTime\": \"2025-02-14T14:47:46.125405Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/showtimes/update/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "update", "1"]
+            },
+            "description": "Update an existing showtime"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"movieId\": 1,\n    \"price\": 50.2,\n    \"theater\": \"Sample Theater\",\n    \"startTime\": \"2025-02-14T11:47:46.125405Z\",\n    \"endTime\": \"2025-02-14T14:47:46.125405Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes/update/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "update", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "id": 1,
+                "price": 50.2,
+                "movieId": 1,
+                "theater": "Sample Theater",
+                "startTime": "2025-02-14T11:47:46.125405Z",
+                "endTime": "2025-02-14T14:47:46.125405Z"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Showtime",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/showtimes/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "1"]
+            },
+            "description": "Delete a showtime by ID"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/showtimes/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "message": "Showtime has been successfully deleted"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Book a Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 15,\n    \"userId\": \"84438967-f68f-4fa0-b620-0f08217e76af\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            },
+            "description": "Create a new booking for a showtime"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 15,\n    \"userId\": \"84438967-f68f-4fa0-b620-0f08217e76af\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/bookings",
+                  "host": ["{{base_url}}"],
+                  "path": ["bookings"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+} 

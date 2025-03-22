@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -20,7 +20,7 @@ export class MoviesController {
     }
   }
 
-  @Get()
+  @Get('all')
   async findAll(): Promise<Movie[]> {
     try {
       return await this.moviesService.findAll();
@@ -33,7 +33,7 @@ export class MoviesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Movie> {
+  async findOne(@Param('id') id: string): Promise<Movie> {
     try {
       const movie = await this.moviesService.findOne(+id);
       if (!movie) {
@@ -54,13 +54,13 @@ export class MoviesController {
     }
   }
 
-  @Patch(':id')
+  @Post('update/:movieTitle')
   async update(
-    @Param('id') id: number,
+    @Param('movieTitle') movieTitle: string,
     @Body() updateMovieDto: UpdateMovieDto,
   ): Promise<Movie> {
     try {
-      return await this.moviesService.update(+id, updateMovieDto);
+      return await this.moviesService.update(movieTitle, updateMovieDto);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -72,10 +72,11 @@ export class MoviesController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number): Promise<{ message: string }> {
+  @Delete(':movieTitle')
+  async remove(@Param('movieTitle') movieTitle: string): Promise<{ message: string }> {
     try {
-      return await this.moviesService.remove(+id);
+      await this.moviesService.remove(movieTitle);
+      return { message: `Movie "${movieTitle}" has been successfully deleted` };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

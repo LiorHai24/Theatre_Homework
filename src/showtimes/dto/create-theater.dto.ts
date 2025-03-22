@@ -1,6 +1,10 @@
-import { IsNumber, Min } from 'class-validator';
+import { IsNumber, Min, IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateTheaterDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
   @IsNumber()
   @Min(1, { message: 'Number of rows must be at least 1' })
   rows: number;

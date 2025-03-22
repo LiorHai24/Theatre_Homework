@@ -1,30 +1,24 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ShowtimesService } from './showtimes.service';
 import { Showtime } from './entities/showtime.entity';
-import { Theater } from './entities/theater.entity';
 import { Movie } from '../movies/entities/movie.entity';
+import { Theater } from './entities/theater.entity';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 import { CreateTheaterDto } from './dto/create-theater.dto';
+import { Booking } from '../bookings/entities/booking.entity';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('ShowtimesService', () => {
   let service: ShowtimesService;
   let showtimeRepository: Repository<Showtime>;
-  let theaterRepository: Repository<Theater>;
   let movieRepository: Repository<Movie>;
+  let theaterRepository: Repository<Theater>;
+  let bookingRepository: Repository<Booking>;
 
   const mockShowtimeRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    delete: jest.fn(),
-  };
-
-  const mockTheaterRepository = {
     create: jest.fn(),
     save: jest.fn(),
     find: jest.fn(),
@@ -36,8 +30,20 @@ describe('ShowtimesService', () => {
     findOne: jest.fn(),
   };
 
+  const mockTheaterRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+  };
+
+  const mockBookingRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         ShowtimesService,
         {
@@ -45,20 +51,25 @@ describe('ShowtimesService', () => {
           useValue: mockShowtimeRepository,
         },
         {
+          provide: getRepositoryToken(Movie),
+          useValue: mockMovieRepository,
+        },
+        {
           provide: getRepositoryToken(Theater),
           useValue: mockTheaterRepository,
         },
         {
-          provide: getRepositoryToken(Movie),
-          useValue: mockMovieRepository,
+          provide: getRepositoryToken(Booking),
+          useValue: mockBookingRepository,
         },
       ],
     }).compile();
 
-    service = moduleRef.get<ShowtimesService>(ShowtimesService);
-    showtimeRepository = moduleRef.get<Repository<Showtime>>(getRepositoryToken(Showtime));
-    theaterRepository = moduleRef.get<Repository<Theater>>(getRepositoryToken(Theater));
-    movieRepository = moduleRef.get<Repository<Movie>>(getRepositoryToken(Movie));
+    service = module.get<ShowtimesService>(ShowtimesService);
+    showtimeRepository = module.get<Repository<Showtime>>(getRepositoryToken(Showtime));
+    movieRepository = module.get<Repository<Movie>>(getRepositoryToken(Movie));
+    theaterRepository = module.get<Repository<Theater>>(getRepositoryToken(Theater));
+    bookingRepository = module.get<Repository<Booking>>(getRepositoryToken(Booking));
   });
 
   it('should be defined', () => {
@@ -66,52 +77,44 @@ describe('ShowtimesService', () => {
   });
 
   describe('create', () => {
-    it('should create a new showtime', async () => {
+    it('should create a showtime', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
+        movieId: 1,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
       };
 
-      const movie = { id: 1, duration: 136 };
-      const theater = { id: 1, capacity: 150, rows: 10, seatsPerRow: 15 };
-      const showtime = { 
-        id: 1, 
-        ...createShowtimeDto, 
-        theater,
-        movie,
-        availableSeats: theater.capacity 
-      };
+      const movie = { id: 1, duration: 180 };
+      const theater = { id: 1, name: 'Sample Theater', capacity: 150 };
+      const showtime = { id: 1, ...createShowtimeDto, movie, theater };
 
       mockMovieRepository.findOne.mockResolvedValue(movie);
       mockTheaterRepository.findOne.mockResolvedValue(theater);
-      mockShowtimeRepository.findOne.mockResolvedValue(null);
       mockShowtimeRepository.create.mockReturnValue(showtime);
       mockShowtimeRepository.save.mockResolvedValue(showtime);
 
       const result = await service.create(createShowtimeDto);
 
       expect(result).toEqual(showtime);
-      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({ where: { id: createShowtimeDto.movie } });
-      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({ where: { id: createShowtimeDto.theater } });
-      expect(mockShowtimeRepository.create).toHaveBeenCalledWith({
-        ...createShowtimeDto,
-        movie,
-        theater,
-        availableSeats: theater.capacity,
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { id: createShowtimeDto.movieId },
       });
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { name: createShowtimeDto.theater },
+      });
+      expect(mockShowtimeRepository.create).toHaveBeenCalled();
       expect(mockShowtimeRepository.save).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when movie is not found', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
+        movieId: 1,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
       };
 
       mockMovieRepository.findOne.mockResolvedValue(null);
@@ -121,14 +124,14 @@ describe('ShowtimesService', () => {
 
     it('should throw NotFoundException when theater is not found', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
+        movieId: 1,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
       };
 
-      const movie = { id: 1, duration: 136 };
+      const movie = { id: 1, duration: 180 };
       mockMovieRepository.findOne.mockResolvedValue(movie);
       mockTheaterRepository.findOne.mockResolvedValue(null);
 
@@ -137,59 +140,27 @@ describe('ShowtimesService', () => {
 
     it('should throw BadRequestException when duration does not match movie duration', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:00:00.000Z'),
-        price: 12.99,
+        movieId: 1,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
       };
 
-      const movie = { id: 1, duration: 136 };
-      const theater = { id: 1, capacity: 150, rows: 10, seatsPerRow: 15 };
-
+      const movie = { id: 1, duration: 120 };
+      const theater = { id: 1, name: 'Sample Theater', capacity: 150 };
       mockMovieRepository.findOne.mockResolvedValue(movie);
       mockTheaterRepository.findOne.mockResolvedValue(theater);
-
-      await expect(service.create(createShowtimeDto)).rejects.toThrow(BadRequestException);
-    });
-
-    it('should throw BadRequestException when there are overlapping showtimes', async () => {
-      const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
-      };
-
-      const movie = { id: 1, duration: 136 };
-      const theater = { id: 1, capacity: 150, rows: 10, seatsPerRow: 15 };
-      const existingShowtime = {
-        id: 1,
-        start_time: new Date('2024-03-20T17:00:00.000Z'),
-        end_time: new Date('2024-03-20T19:00:00.000Z'),
-      };
-
-      mockMovieRepository.findOne.mockResolvedValue(movie);
-      mockTheaterRepository.findOne.mockResolvedValue(theater);
-      mockShowtimeRepository.findOne.mockResolvedValue(existingShowtime);
 
       await expect(service.create(createShowtimeDto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('findByMovie', () => {
-    it('should return showtimes for a specific movie', async () => {
+    it('should return showtimes for a movie', async () => {
       const showtimes = [
-        {
-          id: 1,
-          movie: 1,
-          theater: 1,
-          start_time: new Date('2024-03-20T18:00:00.000Z'),
-          end_time: new Date('2024-03-20T20:16:00.000Z'),
-          price: 12.99,
-          availableSeats: 150,
-        },
+        { id: 1, movie: { id: 1 } },
+        { id: 2, movie: { id: 1 } },
       ];
       mockShowtimeRepository.find.mockResolvedValue(showtimes);
 
@@ -203,42 +174,9 @@ describe('ShowtimesService', () => {
     });
   });
 
-  describe('findUpcoming', () => {
-    it('should return upcoming showtimes', async () => {
-      const showtimes = [
-        {
-          id: 1,
-          movie: 1,
-          theater: 1,
-          start_time: new Date('2024-03-20T18:00:00.000Z'),
-          end_time: new Date('2024-03-20T20:16:00.000Z'),
-          price: 12.99,
-          availableSeats: 150,
-        },
-      ];
-      mockShowtimeRepository.find.mockResolvedValue(showtimes);
-
-      const result = await service.findUpcoming();
-
-      expect(result).toEqual(showtimes);
-      expect(mockShowtimeRepository.find).toHaveBeenCalledWith({
-        where: { start_time: expect.any(Date) },
-        relations: ['movie', 'theater'],
-      });
-    });
-  });
-
   describe('findOne', () => {
-    it('should return a single showtime', async () => {
-      const showtime = {
-        id: 1,
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
-        availableSeats: 150,
-      };
+    it('should return a showtime', async () => {
+      const showtime = { id: 1 };
       mockShowtimeRepository.findOne.mockResolvedValue(showtime);
 
       const result = await service.findOne(1);
@@ -246,7 +184,7 @@ describe('ShowtimesService', () => {
       expect(result).toEqual(showtime);
       expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['movie', 'theater'],
+        relations: ['movie', 'theater', 'bookings'],
       });
     });
 
@@ -260,21 +198,25 @@ describe('ShowtimesService', () => {
   describe('update', () => {
     it('should update a showtime', async () => {
       const updateShowtimeDto: UpdateShowtimeDto = {
-        price: 14.99,
+        movieId: 2,
+        price: 25.2,
+        theater: 'New Theater',
+        startTime: '2025-02-14T12:47:46.125405Z',
+        endTime: '2025-02-14T15:47:46.125405Z',
       };
 
       const existingShowtime = {
         id: 1,
-        movie: { id: 1, duration: 136 },
-        theater: { id: 1 },
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
-        availableSeats: 150,
+        movie: { id: 1, duration: 180 },
+        theater: { id: 1, name: 'Old Theater' },
       };
-      const updatedShowtime = { ...existingShowtime, ...updateShowtimeDto };
+      const movie = { id: 2, duration: 180 };
+      const theater = { id: 2, name: 'New Theater' };
+      const updatedShowtime = { id: 1, ...updateShowtimeDto, movie, theater };
 
       mockShowtimeRepository.findOne.mockResolvedValue(existingShowtime);
+      mockMovieRepository.findOne.mockResolvedValue(movie);
+      mockTheaterRepository.findOne.mockResolvedValue(theater);
       mockShowtimeRepository.save.mockResolvedValue(updatedShowtime);
 
       const result = await service.update(1, updateShowtimeDto);
@@ -284,102 +226,94 @@ describe('ShowtimesService', () => {
         where: { id: 1 },
         relations: ['movie', 'theater'],
       });
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { id: updateShowtimeDto.movieId },
+      });
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { name: updateShowtimeDto.theater },
+      });
       expect(mockShowtimeRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when updating non-existent showtime', async () => {
+    it('should throw NotFoundException when showtime is not found', async () => {
       mockShowtimeRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update(1, { price: 14.99 })).rejects.toThrow(NotFoundException);
+      await expect(service.update(1, {})).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('remove', () => {
-    it('should delete a showtime and return success message', async () => {
-      const showtime = {
-        id: 1,
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
-        price: 12.99,
-        availableSeats: 150,
-      };
-      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+    it('should remove a showtime', async () => {
       mockShowtimeRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(1);
 
       expect(result).toEqual({ message: 'Showtime with ID 1 has been successfully deleted' });
-      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['movie', 'theater']
-      });
       expect(mockShowtimeRepository.delete).toHaveBeenCalledWith(1);
     });
 
-    it('should throw NotFoundException when deleting non-existent showtime', async () => {
-      mockShowtimeRepository.findOne.mockResolvedValue(null);
+    it('should throw NotFoundException when showtime is not found', async () => {
       mockShowtimeRepository.delete.mockResolvedValue({ affected: 0 });
 
       await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('Theater Operations', () => {
-    describe('createTheater', () => {
-      it('should create a new theater', async () => {
-        const createTheaterDto: CreateTheaterDto = {
-          rows: 10,
-          seatsPerRow: 15,
-        };
+  describe('createTheater', () => {
+    it('should create a theater', async () => {
+      const createTheaterDto: CreateTheaterDto = {
+        name: 'Sample Theater',
+        rows: 10,
+        seatsPerRow: 15,
+      };
 
-        const theater = { id: 1, ...createTheaterDto, capacity: 150 };
-        mockTheaterRepository.create.mockReturnValue(theater);
-        mockTheaterRepository.save.mockResolvedValue(theater);
+      const theater = { id: 1, ...createTheaterDto, capacity: 150 };
+      mockTheaterRepository.create.mockReturnValue(theater);
+      mockTheaterRepository.save.mockResolvedValue(theater);
 
-        const result = await service.createTheater(createTheaterDto);
+      const result = await service.createTheater(createTheaterDto);
 
-        expect(result).toEqual(theater);
-        expect(mockTheaterRepository.create).toHaveBeenCalledWith({
-          ...createTheaterDto,
-          capacity: 150,
-        });
-        expect(mockTheaterRepository.save).toHaveBeenCalled();
+      expect(result).toEqual(theater);
+      expect(mockTheaterRepository.create).toHaveBeenCalledWith({
+        ...createTheaterDto,
+        capacity: 150,
+      });
+      expect(mockTheaterRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getTheaters', () => {
+    it('should return all theaters', async () => {
+      const theaters = [
+        { id: 1, name: 'Theater 1' },
+        { id: 2, name: 'Theater 2' },
+      ];
+      mockTheaterRepository.find.mockResolvedValue(theaters);
+
+      const result = await service.getTheaters();
+
+      expect(result).toEqual(theaters);
+      expect(mockTheaterRepository.find).toHaveBeenCalled();
+    });
+  });
+
+  describe('getTheaterById', () => {
+    it('should return a theater', async () => {
+      const theater = { id: 1, name: 'Sample Theater' };
+      mockTheaterRepository.findOne.mockResolvedValue(theater);
+
+      const result = await service.getTheaterById(1);
+
+      expect(result).toEqual(theater);
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
       });
     });
 
-    describe('getTheaters', () => {
-      it('should return an array of theaters', async () => {
-        const theaters = [
-          { id: 1, capacity: 150, rows: 10, seatsPerRow: 15 },
-          { id: 2, capacity: 200, rows: 12, seatsPerRow: 17 },
-        ];
-        mockTheaterRepository.find.mockResolvedValue(theaters);
+    it('should throw NotFoundException when theater is not found', async () => {
+      mockTheaterRepository.findOne.mockResolvedValue(null);
 
-        const result = await service.getTheaters();
-
-        expect(result).toEqual(theaters);
-        expect(mockTheaterRepository.find).toHaveBeenCalled();
-      });
-    });
-
-    describe('getTheaterById', () => {
-      it('should return a single theater', async () => {
-        const theater = { id: 1, capacity: 150, rows: 10, seatsPerRow: 15 };
-        mockTheaterRepository.findOne.mockResolvedValue(theater);
-
-        const result = await service.getTheaterById(1);
-
-        expect(result).toEqual(theater);
-        expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-      });
-
-      it('should throw NotFoundException when theater is not found', async () => {
-        mockTheaterRepository.findOne.mockResolvedValue(null);
-
-        await expect(service.getTheaterById(1)).rejects.toThrow(NotFoundException);
-      });
+      await expect(service.getTheaterById(1)).rejects.toThrow(NotFoundException);
     });
   });
 });

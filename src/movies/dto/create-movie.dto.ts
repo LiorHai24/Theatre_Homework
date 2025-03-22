@@ -15,7 +15,7 @@ export class CreateMovieDto {
 
   @IsNumber({}, { message: 'Rating must be a number' })
   @Min(0, { message: 'Rating cannot be negative' })
-  @Max(5, { message: 'Rating cannot be higher than 5' })
+  @Max(10, { message: 'Rating cannot be higher than 10' })
   rating: number;
 
   @IsInt({ message: 'Release year must be a whole number' })

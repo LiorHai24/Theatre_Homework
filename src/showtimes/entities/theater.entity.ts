@@ -7,6 +7,9 @@ export class Theater {
   id: number;
 
   @Column()
+  name: string;
+
+  @Column()
   capacity: number;
 
   @Column()

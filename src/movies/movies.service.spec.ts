@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MoviesService } from './movies.service';
@@ -6,7 +6,7 @@ import { Movie } from './entities/movie.entity';
 import { Showtime } from '../showtimes/entities/showtime.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('MoviesService', () => {
   let service: MoviesService;
@@ -18,16 +18,18 @@ describe('MoviesService', () => {
     save: jest.fn(),
     find: jest.fn(),
     findOne: jest.fn(),
-    delete: jest.fn(),
+    remove: jest.fn(),
   };
 
   const mockShowtimeRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
+    save: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         MoviesService,
         {
@@ -41,9 +43,9 @@ describe('MoviesService', () => {
       ],
     }).compile();
 
-    service = moduleRef.get<MoviesService>(MoviesService);
-    movieRepository = moduleRef.get<Repository<Movie>>(getRepositoryToken(Movie));
-    showtimeRepository = moduleRef.get<Repository<Showtime>>(getRepositoryToken(Showtime));
+    service = module.get<MoviesService>(MoviesService);
+    movieRepository = module.get<Repository<Movie>>(getRepositoryToken(Movie));
+    showtimeRepository = module.get<Repository<Showtime>>(getRepositoryToken(Showtime));
   });
 
   it('should be defined', () => {
@@ -51,7 +53,7 @@ describe('MoviesService', () => {
   });
 
   describe('create', () => {
-    it('should create a new movie', async () => {
+    it('should create a movie', async () => {
       const createMovieDto: CreateMovieDto = {
         title: 'Test Movie',
         genre: 'Action',
@@ -75,8 +77,8 @@ describe('MoviesService', () => {
   describe('findAll', () => {
     it('should return an array of movies', async () => {
       const movies = [
-        { id: 1, title: 'Movie 1', genre: 'Action', duration: 120, rating: 4.5, release_year: 2024 },
-        { id: 2, title: 'Movie 2', genre: 'Comedy', duration: 90, rating: 4.0, release_year: 2023 },
+        { id: 1, title: 'Movie 1' },
+        { id: 2, title: 'Movie 2' },
       ];
       mockMovieRepository.find.mockResolvedValue(movies);
 
@@ -88,14 +90,17 @@ describe('MoviesService', () => {
   });
 
   describe('findOne', () => {
-    it('should return a single movie', async () => {
-      const movie = { id: 1, title: 'Test Movie', genre: 'Action', duration: 120, rating: 4.5, release_year: 2024 };
+    it('should return a movie', async () => {
+      const movie = { id: 1, title: 'Test Movie' };
       mockMovieRepository.findOne.mockResolvedValue(movie);
 
       const result = await service.findOne(1);
 
       expect(result).toEqual(movie);
-      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['showtimes'],
+      });
     });
 
     it('should throw NotFoundException when movie is not found', async () => {
@@ -109,47 +114,87 @@ describe('MoviesService', () => {
     it('should update a movie', async () => {
       const updateMovieDto: UpdateMovieDto = {
         title: 'Updated Movie',
-        rating: 5.0,
+        duration: 150,
       };
 
-      const existingMovie = { id: 1, title: 'Original Movie', rating: 4.0, genre: 'Action', duration: 120, release_year: 2024 };
-      const updatedMovie = { ...existingMovie, ...updateMovieDto };
+      const movie = { id: 1, title: 'Test Movie', duration: 120, showtimes: [] };
+      mockMovieRepository.findOne.mockResolvedValue(movie);
+      mockMovieRepository.save.mockResolvedValue({ ...movie, ...updateMovieDto });
 
-      mockMovieRepository.findOne.mockResolvedValue(existingMovie);
-      mockMovieRepository.save.mockResolvedValue(updatedMovie);
+      const result = await service.update('Test Movie', updateMovieDto);
 
-      const result = await service.update(1, updateMovieDto);
-
-      expect(result).toEqual(updatedMovie);
-      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(result).toEqual({ ...movie, ...updateMovieDto });
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: 'Test Movie' },
+        relations: ['showtimes'],
+      });
       expect(mockMovieRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when updating non-existent movie', async () => {
+    it('should throw NotFoundException when movie is not found', async () => {
       mockMovieRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update(1, { title: 'Updated Movie' })).rejects.toThrow(NotFoundException);
+      await expect(service.update('Non-existent Movie', {})).rejects.toThrow(NotFoundException);
+    });
+
+    it('should validate showtime durations when updating movie duration', async () => {
+      const updateMovieDto: UpdateMovieDto = {
+        duration: 150,
+      };
+
+      const movie = {
+        id: 1,
+        title: 'Test Movie',
+        duration: 120,
+        showtimes: [],
+      };
+
+      const showtimes = [
+        {
+          id: 1,
+          start_time: new Date(),
+          end_time: new Date(Date.now() + 120 * 60000), // 120 minutes
+        },
+      ];
+
+      mockMovieRepository.findOne.mockResolvedValue(movie);
+      mockShowtimeRepository.find.mockResolvedValue(showtimes);
+
+      await expect(service.update('Test Movie', updateMovieDto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('remove', () => {
-    it('should delete a movie and return success message', async () => {
-      const movie = { id: 1, title: 'Test Movie', genre: 'Action', duration: 120, rating: 4.5, release_year: 2024 };
+    it('should remove a movie', async () => {
+      const movie = { id: 1, title: 'Test Movie', showtimes: [] };
       mockMovieRepository.findOne.mockResolvedValue(movie);
-      mockMovieRepository.delete.mockResolvedValue({ affected: 1 });
+      mockMovieRepository.remove.mockResolvedValue(movie);
 
-      const result = await service.remove(1);
+      const result = await service.remove('Test Movie');
 
-      expect(result).toEqual({ message: 'Movie with ID 1 has been successfully deleted' });
-      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(mockMovieRepository.delete).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ message: 'Movie "Test Movie" has been successfully deleted' });
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: 'Test Movie' },
+        relations: ['showtimes'],
+      });
+      expect(mockMovieRepository.remove).toHaveBeenCalledWith(movie);
     });
 
-    it('should throw NotFoundException when deleting non-existent movie', async () => {
+    it('should throw NotFoundException when movie is not found', async () => {
       mockMovieRepository.findOne.mockResolvedValue(null);
-      mockMovieRepository.delete.mockResolvedValue({ affected: 0 });
 
-      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
+      await expect(service.remove('Non-existent Movie')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when movie has showtimes', async () => {
+      const movie = {
+        id: 1,
+        title: 'Test Movie',
+        showtimes: [{ id: 1 }],
+      };
+      mockMovieRepository.findOne.mockResolvedValue(movie);
+
+      await expect(service.remove('Test Movie')).rejects.toThrow(BadRequestException);
     });
   });
 });

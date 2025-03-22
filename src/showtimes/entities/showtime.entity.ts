@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Movie } from '../../movies/entities/movie.entity';
 import { Theater } from './theater.entity';
-import { Ticket } from '../../tickets/entities/ticket.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity()
 export class Showtime {
@@ -14,10 +14,10 @@ export class Showtime {
   @ManyToOne(() => Theater, theater => theater.showtimes)
   theater: Theater;
 
-  @Column()
+  @Column({ type: 'timestamp' })
   start_time: Date;
 
-  @Column()
+  @Column({ type: 'timestamp' })
   end_time: Date;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -26,6 +26,6 @@ export class Showtime {
   @Column()
   availableSeats: number;
 
-  @OneToMany(() => Ticket, ticket => ticket.showtime)
-  tickets: Ticket[];
+  @OneToMany(() => Booking, booking => booking.showtime)
+  bookings: Booking[];
 } 

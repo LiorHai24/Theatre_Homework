@@ -43,10 +43,10 @@ describe('ShowtimesController', () => {
   describe('create', () => {
     it('should create a showtime', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
-        movie: 1,
-        theater: 1,
-        start_time: new Date('2024-03-20T18:00:00.000Z'),
-        end_time: new Date('2024-03-20T20:16:00.000Z'),
+        movieId: 1,
+        theater: 'Theater 1',
+        startTime: '2024-03-20T18:00:00.000Z',
+        endTime: '2024-03-20T20:16:00.000Z',
         price: 12.99,
       };
       const expectedResult = { id: 1, ...createShowtimeDto };
@@ -59,20 +59,6 @@ describe('ShowtimesController', () => {
     });
   });
 
-  describe('findUpcoming', () => {
-    it('should return upcoming showtimes', async () => {
-      const expectedResult = [
-        { id: 1, movie: 1, theater: 1 },
-        { id: 2, movie: 2, theater: 2 },
-      ];
-      mockShowtimesService.findUpcoming.mockResolvedValue(expectedResult);
-
-      const result = await controller.findUpcoming();
-
-      expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.findUpcoming).toHaveBeenCalled();
-    });
-  });
 
   describe('findByMovie', () => {
     it('should return showtimes for a specific movie', async () => {
@@ -82,7 +68,7 @@ describe('ShowtimesController', () => {
       ];
       mockShowtimesService.findByMovie.mockResolvedValue(expectedResult);
 
-      const result = await controller.findByMovie(1);
+      const result = await controller.findByMovie('1');
 
       expect(result).toEqual(expectedResult);
       expect(mockShowtimesService.findByMovie).toHaveBeenCalledWith(1);
@@ -94,7 +80,7 @@ describe('ShowtimesController', () => {
       const expectedResult = { id: 1, movie: 1, theater: 1 };
       mockShowtimesService.findOne.mockResolvedValue(expectedResult);
 
-      const result = await controller.findOne(1);
+      const result = await controller.findOne('1');
 
       expect(result).toEqual(expectedResult);
       expect(mockShowtimesService.findOne).toHaveBeenCalledWith(1);
@@ -109,7 +95,7 @@ describe('ShowtimesController', () => {
       const expectedResult = { id: 1, ...updateShowtimeDto };
       mockShowtimesService.update.mockResolvedValue(expectedResult);
 
-      const result = await controller.update(1, updateShowtimeDto);
+      const result = await controller.update('1', updateShowtimeDto);
 
       expect(result).toEqual(expectedResult);
       expect(mockShowtimesService.update).toHaveBeenCalledWith(1, updateShowtimeDto);
@@ -121,7 +107,7 @@ describe('ShowtimesController', () => {
       const expectedResult = { message: 'Showtime with ID 1 has been successfully deleted' };
       mockShowtimesService.remove.mockResolvedValue(expectedResult);
 
-      const result = await controller.remove(1);
+      const result = await controller.remove('1');
 
       expect(result).toEqual(expectedResult);
       expect(mockShowtimesService.remove).toHaveBeenCalledWith(1);
@@ -131,6 +117,7 @@ describe('ShowtimesController', () => {
   describe('createTheater', () => {
     it('should create a theater', async () => {
       const createTheaterDto: CreateTheaterDto = {
+        name: 'Theater 1',
         rows: 10,
         seatsPerRow: 15,
       };

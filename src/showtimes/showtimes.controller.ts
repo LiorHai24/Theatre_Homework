@@ -16,47 +16,8 @@ export class ShowtimesController {
   }
 
   @Get('movie/:movieId')
-  findByMovie(@Param('movieId') movieId: number): Promise<Showtime[]> {
+  findByMovie(@Param('movieId') movieId: string): Promise<Showtime[]> {
     return this.showtimesService.findByMovie(+movieId);
-  }
-
-  @Get('upcoming')
-  findUpcoming(): Promise<Showtime[]> {
-    return this.showtimesService.findUpcoming();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: number): Promise<Showtime> {
-    return this.showtimesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() updateShowtimeDto: UpdateShowtimeDto,
-  ): Promise<Showtime> {
-    try {
-      return await this.showtimesService.update(+id, updateShowtimeDto);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new HttpException(
-        error.message || 'Failed to update showtime',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-  
-
-  @Delete(':id')
-  remove(@Param('id') id: number): Promise<{ message: string }> {
-    return this.showtimesService.remove(+id);
-  }
-
-  @Post('theater')
-  createTheater(@Body() createTheaterDto: CreateTheaterDto): Promise<Theater> {
-    return this.showtimesService.createTheater(createTheaterDto);
   }
 
   @Get('theaters')
@@ -64,8 +25,28 @@ export class ShowtimesController {
     return this.showtimesService.getTheaters();
   }
 
-  @Get('theater/:id')
+  @Get('theaters/:id')
   getTheaterById(@Param('id') id: string): Promise<Theater> {
     return this.showtimesService.getTheaterById(+id);
+  }
+
+  @Post('theaters')
+  createTheater(@Body() createTheaterDto: CreateTheaterDto): Promise<Theater> {
+    return this.showtimesService.createTheater(createTheaterDto);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<Showtime> {
+    return this.showtimesService.findOne(+id);
+  }
+
+  @Post('update/:id')
+  update(@Param('id') id: string, @Body() updateShowtimeDto: UpdateShowtimeDto): Promise<Showtime> {
+    return this.showtimesService.update(+id, updateShowtimeDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<{ message: string }> {
+    return this.showtimesService.remove(+id);
   }
 }
