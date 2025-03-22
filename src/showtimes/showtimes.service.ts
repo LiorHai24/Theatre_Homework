@@ -5,6 +5,7 @@ import { Showtime } from './entities/showtime.entity';
 import { Movie } from '../movies/entities/movie.entity';
 import { Theater } from './entities/theater.entity';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
+import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 import { CreateTheaterDto } from './dto/create-theater.dto';
 
 @Injectable()
@@ -91,7 +92,7 @@ export class ShowtimesService {
     return showtime;
   }
 
-  async update(id: number, updateShowtimeDto: Partial<CreateShowtimeDto>): Promise<Showtime> {
+  async update(id: number, updateShowtimeDto: UpdateShowtimeDto): Promise<Showtime> {
     const showtime = await this.findOne(id);
 
     if (updateShowtimeDto.theater && updateShowtimeDto.theater !== showtime.theater.id) {
@@ -102,20 +103,14 @@ export class ShowtimesService {
 
       // Check for overlapping showtimes in the new theater
       const overlappingShowtime = await this.showtimeRepository.findOne({
-        where: [
-          {
-            theater: { id: updateShowtimeDto.theater },
-            start_time: updateShowtimeDto.start_time || showtime.start_time,
-          },
-          {
-            theater: { id: updateShowtimeDto.theater },
-            end_time: updateShowtimeDto.end_time || showtime.end_time,
-          },
-        ],
+        where: {
+          theater: { id: updateShowtimeDto.theater },
+          start_time: Between(updateShowtimeDto.start_time || showtime.start_time, updateShowtimeDto.end_time || showtime.end_time),
+        },
       });
 
       if (overlappingShowtime) {
-        throw new BadRequestException('There is already a showtime scheduled for this time in this theater');
+        throw new BadRequestException('There is already a showtime scheduled during this time period in this theater');
       }
     }
 
@@ -145,6 +140,19 @@ export class ShowtimesService {
 
     if (updateShowtimeDto.price) {
       showtime.price = updateShowtimeDto.price;
+    }
+
+    // Validate duration if either start_time or end_time is updated
+    if (updateShowtimeDto.start_time || updateShowtimeDto.end_time) {
+      const startTime = updateShowtimeDto.start_time || showtime.start_time;
+      const endTime = updateShowtimeDto.end_time || showtime.end_time;
+      const durationInMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+
+      if (durationInMinutes !== showtime.movie.duration) {
+        throw new BadRequestException(
+          `Showtime duration (${durationInMinutes} minutes) does not match movie duration (${showtime.movie.duration} minutes)`
+        );
+      }
     }
 
     return this.showtimeRepository.save(showtime);

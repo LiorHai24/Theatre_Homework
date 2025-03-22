@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { ShowtimesService } from './showtimes.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
+import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 import { CreateTheaterDto } from './dto/create-theater.dto';
 import { Showtime } from './entities/showtime.entity';
 import { Theater } from './entities/theater.entity';
@@ -29,13 +30,24 @@ export class ShowtimesController {
     return this.showtimesService.findOne(+id);
   }
 
-  @Put(':id')
-  update(
+  @Patch(':id')
+  async update(
     @Param('id') id: number,
-    @Body() updateData: Partial<CreateShowtimeDto>,
+    @Body() updateShowtimeDto: UpdateShowtimeDto,
   ): Promise<Showtime> {
-    return this.showtimesService.update(+id, updateData);
+    try {
+      return await this.showtimesService.update(+id, updateShowtimeDto);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        error.message || 'Failed to update showtime',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
+  
 
   @Delete(':id')
   remove(@Param('id') id: number): Promise<{ message: string }> {
