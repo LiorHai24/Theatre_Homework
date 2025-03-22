@@ -58,7 +58,7 @@ export class MoviesController {
   async update(
     @Param('movieTitle') movieTitle: string,
     @Body() updateMovieDto: UpdateMovieDto,
-  ): Promise<Movie> {
+  ): Promise<{message: string}> {
     try {
       return await this.moviesService.update(movieTitle, updateMovieDto);
     } catch (error) {

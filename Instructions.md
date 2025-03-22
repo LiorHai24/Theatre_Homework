@@ -1,404 +1,242 @@
-# Popcorn Palace Movie Ticket Booking System - API Documentation
+# Popcorn Palace - Movie Theater Booking System
 
-## Base URL
-```
-http://localhost:3000
-```
+## Overview
+Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation.
 
-## Authentication
-All endpoints require authentication using JWT tokens. Include the token in the Authorization header:
-```
-Authorization: Bearer <your_jwt_token>
-```
-
-## Endpoints
+## API Endpoints
 
 ### Movies
 
 #### Get All Movies
-```http
-GET /movies
-```
-**Response (200 OK)**
+- **Endpoint**: `GET /movies/all`
+- **Description**: Retrieves all movies in the system
+- **Response**: Array of movie objects
 ```json
 [
   {
     "id": 1,
-    "title": "The Matrix",
-    "duration": 136,
-    "genre": "Sci-Fi",
-    "release_year": 1999,
-    "rating": 8.7
-  },
-  {
-    "id": 2,
-    "title": "Inception",
-    "duration": 148,
-    "genre": "Sci-Fi",
-    "release_year": 2010,
-    "rating": 8.8
-  },
-  {
-    "id": 3,
-    "title": "The Dark Knight",
-    "duration": 152,
+    "title": "Sample Movie",
     "genre": "Action",
-    "release_year": 2008,
-    "rating": 9.0
+    "duration": 120,
+    "rating": 8.5,
+    "release_year": 2024
   }
 ]
 ```
 
-#### Get Movie by ID
-```http
-GET /movies/:id
-```
-**Response (200 OK)**
+#### Add Movie
+- **Endpoint**: `POST /movies`
+- **Description**: Adds a new movie to the system
+- **Request Body**:
 ```json
 {
-  "id": 1,
-  "title": "The Matrix",
-  "duration": 136,
-  "genre": "Sci-Fi",
-  "release_year": 1999,
-  "rating": 8.7
+  "title": "Sample Movie",
+  "genre": "Action",
+  "duration": 120,
+  "rating": 8.5,
+  "release_year": 2024
 }
 ```
-
-#### Create Movie
-```http
-POST /movies
-```
-**Request Body**
-```json
-{
-  "title": "The Matrix",
-  "duration": 136,
-  "genre": "Sci-Fi",
-  "release_year": 1999,
-  "rating": 8.7
-}
-```
-**Response (201 Created)**
-```json
-{
-  "id": 1,
-  "title": "The Matrix",
-  "duration": 136,
-  "genre": "Sci-Fi",
-  "release_year": 1999,
-  "rating": 8.7
-}
-```
+- **Response**: Created movie object
 
 #### Update Movie
-```http
-POST /movies/update/:movieTitle
-```
-**Request Body**
+- **Endpoint**: `POST /movies/update/{movieTitle}`
+- **Description**: Updates an existing movie by title
+- **Request Body**:
 ```json
 {
-  "title": "The Matrix Reloaded",
-  "duration": 138,
-  "genre": "Sci-Fi",
-  "release_year": 2003,
-  "rating": 7.2
+  "title": "Updated Movie Title",
+  "genre": "Action",
+  "duration": 120,
+  "rating": 8.5,
+  "release_year": 2024
 }
 ```
-**Response (200 OK)**
-```json
-{
-  "id": 1,
-  "title": "The Matrix Reloaded",
-  "duration": 138,
-  "genre": "Sci-Fi",
-  "release_year": 2003,
-  "rating": 7.2
-}
-```
-**Note**: If the movie duration is updated and it causes any showtime overlaps, those showtimes will be deleted and a 404 error will be returned with a message indicating which showtimes were affected.
+- **Response**: Updated movie object
 
 #### Delete Movie
-```http
-DELETE /movies/:movieTitle
-```
-**Response (200 OK)**
+- **Endpoint**: `DELETE /movies/{movieTitle}`
+- **Description**: Deletes a movie by title
+- **Response**: Success message
+
+### Theaters
+
+#### Create Theater
+- **Endpoint**: `POST /showtimes/theaters`
+- **Description**: Creates a new theater
+- **Request Body**:
 ```json
 {
-  "message": "Movie \"The Matrix\" has been successfully deleted"
+  "name": "Sample Theater",
+  "rows": 10,
+  "seatsPerRow": 15
 }
 ```
+- **Response**: Created theater object
+
+#### Get All Theaters
+- **Endpoint**: `GET /showtimes/theaters`
+- **Description**: Retrieves all theaters
+- **Response**: Array of theater objects
+```json
+[
+  {
+    "id": 1,
+    "name": "Sample Theater",
+    "rows": 10,
+    "seatsPerRow": 15,
+    "capacity": 150
+  }
+]
+```
+
+#### Get Theater by ID
+- **Endpoint**: `GET /showtimes/theaters/{id}`
+- **Description**: Retrieves a specific theater by ID
+- **Response**: Theater object
 
 ### Showtimes
-#### Create Showtime - time stamp must match movie time period.
-```http
-POST /showtimes
-```
-**Request Body**
+
+#### Get Showtime by ID
+- **Endpoint**: `GET /showtimes/{id}`
+- **Description**: Retrieves a specific showtime by ID
+- **Response**: Showtime object with movie and theater details
+
+#### Add Showtime
+- **Endpoint**: `POST /showtimes`
+- **Description**: Creates a new showtime
+- **Request Body**:
 ```json
 {
   "movieId": 1,
-  "theaterId": 1,
-  "startTime": "2024-03-20T18:00:00.000Z",
-  "price": 12.99
+  "price": 20.2,
+  "theater": "Sample Theater",
+  "startTime": "2024-02-14T11:47:46.125405Z",
+  "endTime": "2024-02-14T13:47:46.125405Z"
 }
 ```
-**Response (201 Created)**
-```json
-{
-  "id": 1,
-  "movie": {
-    "id": 1,
-    "title": "The Matrix"
-  },
-  "theater": {
-    "id": 1,
-    "name": "Main Theater",
-    "capacity": 150,
-    "rows": 10,
-    "seatsPerRow": 15
-  },
-  "startTime": "2024-03-20T18:00:00.000Z",
-  "endTime": "2024-03-20T20:16:00.000Z",
-  "price": 12.99,
-  "availableSeats": 150
-}
-```
-
-#### Get Showtime by ID
-```http
-GET /showtimes/:id
-```
-**Response (200 OK)**
-```json
-{
-  "id": 1,
-  "movie": {
-    "id": 1,
-    "title": "The Matrix"
-  },
-  "theater": {
-    "id": 1,
-    "name": "Main Theater",
-    "capacity": 150,
-    "rows": 10,
-    "seatsPerRow": 15
-  },
-  "startTime": "2024-03-20T18:00:00.000Z",
-  "endTime": "2024-03-20T20:16:00.000Z",
-  "price": 12.99,
-  "availableSeats": 100
-}
-```
+- **Response**: Created showtime object
 
 #### Update Showtime
-```http
-PATCH /showtimes/:id
-```
-**Request Body**
+- **Endpoint**: `POST /showtimes/update/{id}`
+- **Description**: Updates an existing showtime
+- **Request Body**:
 ```json
 {
-  "price": 14.99,
-  "startTime": "2024-03-20T19:00:00.000Z"
+  "movieId": 1,
+  "price": 20.2,
+  "theater": "Sample Theater",
+  "startTime": "2024-02-14T11:47:46.125405Z",
+  "endTime": "2024-02-14T13:47:46.125405Z"
 }
 ```
-**Response (200 OK)**
-```json
-{
-  "id": 1,
-  "movie": {
-    "id": 1,
-    "title": "The Matrix"
-  },
-  "theater": {
-    "id": 1,
-    "name": "Main Theater",
-    "capacity": 150,
-    "rows": 10,
-    "seatsPerRow": 15
-  },
-  "startTime": "2024-03-20T19:00:00.000Z",
-  "endTime": "2024-03-20T21:16:00.000Z",
-  "price": 14.99,
-  "availableSeats": 100
-}
-```
+- **Response**: Updated showtime object
 
 #### Delete Showtime
-```http
-DELETE /showtimes/:id
-```
-**Response (200 OK)**
+- **Endpoint**: `DELETE /showtimes/{id}`
+- **Description**: Deletes a showtime by ID
+- **Response**: Success message
+
+### Bookings
+
+#### Create Booking
+- **Endpoint**: `POST /bookings`
+- **Description**: Creates a new booking for a showtime
+- **Request Body**:
 ```json
 {
-  "message": "Showtime with ID 1 has been successfully deleted"
+  "showtimeId": 1,
+  "seatNumber": 15,
+  "userId": "84438967-f68f-4fa0-b620-0f08217e76af"
+}
+```
+- **Response**: Booking ID
+```json
+{
+  "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
 }
 ```
 
-### Tickets
-
-#### Book Ticket
-```http
-POST /tickets
-```
-**Request Body**
-```json
-{
-  "showtime_id": 1,
-  "row_number": 5,
-  "seat_number": 10,
-  "customer_name": "John Doe",
-  "customer_email": "john@example.com"
-}
-```
-**Response (201 Created)**
-```json
-{
-  "id": 1,
-  "showtime": {
-    "id": 1,
-    "movie": {
-      "id": 1,
-      "title": "The Matrix"
-    },
-    "theater": {
-      "id": 1,
-      "name": "Main Theater"
-    },
-    "startTime": "2024-03-20T18:00:00.000Z",
-    "endTime": "2024-03-20T20:16:00.000Z",
-    "price": 12.99
-  },
-  "row_number": 5,
-  "seat_number": 10,
-  "customer_name": "John Doe",
-  "customer_email": "john@example.com",
-  "price": 12.99
-}
-```
-
-#### Get Tickets by Showtime
-```http
-GET /tickets/showtime/:id
-```
-**Response (200 OK)**
-```json
-[
-  {
-    "id": 1,
-    "showtime": {
-      "id": 1,
-      "movie": {
-        "id": 1,
-        "title": "The Matrix"
-      },
-      "theater": {
-        "id": 1,
-        "name": "Main Theater"
-      },
-      "startTime": "2024-03-20T18:00:00.000Z",
-      "endTime": "2024-03-20T20:16:00.000Z",
-      "price": 12.99
-    },
-    "row_number": 5,
-    "seat_number": 10,
-    "customer_name": "John Doe",
-    "customer_email": "john@example.com",
-    "price": 12.99
-  }
-]
-```
-
-#### Get Tickets by Customer(by email adress)
-```http
-GET /tickets/customer/:email
-```
-**Response (200 OK)**
-```json
-[
-  {
-    "id": 1,
-    "showtime": {
-      "id": 1,
-      "movie": {
-        "id": 1,
-        "title": "The Matrix"
-      },
-      "theater": {
-        "id": 1,
-        "name": "Main Theater"
-      },
-      "startTime": "2024-03-20T18:00:00.000Z",
-      "endTime": "2024-03-20T20:16:00.000Z",
-      "price": 12.99
-    },
-    "row_number": 5,
-    "seat_number": 10,
-    "customer_name": "John Doe",
-    "customer_email": "john@example.com",
-    "price": 12.99
-  }
-]
-```
-
-#### Cancel Ticket
-```http
-DELETE /tickets/:id
-```
-**Response (200 OK)**
-```json
-{
-  "message": "Ticket with ID 1 has been successfully cancelled"
-}
-```
-
-## Error Responses
-
-### 400 Bad Request
-```json
-{
-  "statusCode": 400,
-  "message": "Seat 10 in row 5 is already booked for this showtime.",
-  "error": "Bad Request"
-}
-```
-
-### 404 Not Found
-```json
-{
-  "statusCode": 404,
-  "message": "Showtime with ID 1 not found",
-  "error": "Not Found"
-}
-```
-
-### 401 Unauthorized
-```json
-{
-  "statusCode": 401,
-  "message": "Unauthorized",
-  "error": "Unauthorized"
-}
-```
-
-## Data Validation
+## Data Models
 
 ### Movie
-- Title: Required, string
-- Duration: Required, number (minutes)
-- Genre: Required, string
-- Release Year: Required, number
-- Rating: Required, number (0-5)
+```typescript
+{
+  id: number;
+  title: string;
+  genre: string;
+  duration: number;
+  rating: number;
+  release_year: number;
+}
+```
+
+### Theater
+```typescript
+{
+  id: number;
+  name: string;
+  rows: number;
+  seatsPerRow: number;
+  capacity: number;
+}
+```
 
 ### Showtime
-- Movie ID: Required, number
-- Theater ID: Required, number
-- Start Time: Required, ISO date string
-- Price: Required, number (decimal)
+```typescript
+{
+  id: number;
+  movie: Movie;
+  theater: Theater;
+  start_time: Date;
+  end_time: Date;
+  price: number;
+  availableSeats: number;
+}
+```
 
-### Ticket
-- Showtime ID: Required, number
-- Row Number: Required, number
-- Seat Number: Required, number
-- Customer Name: Required, string
-- Customer Email: Required, valid email format
+### Booking
+```typescript
+{
+  id: string; // UUID
+  showtime: Showtime;
+  seatNumber: number;
+  userId: string; // UUID
+}
+```
+
+## Validation Rules
+1. Movie duration must match showtime duration (within 5 minutes tolerance)
+2. Showtimes cannot overlap in the same theater
+3. Seat numbers must be valid (between 1 and theater capacity)
+4. Seats cannot be double-booked
+5. User IDs must be valid UUIDs
+6. Theater names must be unique
+7. Movie titles must be unique
+
+## Error Handling
+- 400 Bad Request: Invalid input data
+- 404 Not Found: Resource not found
+- 409 Conflict: Resource already exists or conflict with existing data
+- 500 Internal Server Error: Server-side error
+
+## Testing
+The system includes comprehensive tests for all endpoints and business logic. Tests cover:
+- Successful operations
+- Error cases
+- Validation rules
+- Edge cases
+- Data integrity
+
+
+## Installation
+
+```bash
+$ npm install
+```
+
+## Running the app
+
+```bash
+# development
+$ npm run start

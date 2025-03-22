@@ -37,7 +37,7 @@ export class MoviesService {
     return movie;
   }
 
-  async update(movieTitle: string, updateMovieDto: UpdateMovieDto): Promise<Movie> {
+  async update(movieTitle: string, updateMovieDto: UpdateMovieDto): Promise<{ message: string }> {
     const movie = await this.movieRepository.findOne({
       where: { title: movieTitle },
       relations: ['showtimes'],
@@ -79,7 +79,9 @@ export class MoviesService {
 
     // Update the movie
     Object.assign(movie, updateMovieDto);
-    return this.movieRepository.save(movie);
+    await this.movieRepository.save(movie);
+
+    return { message :`Movie ${movieTitle} has been successfully updated`}
   }
 
   async remove(movieTitle: string): Promise<{ message: string }> {
