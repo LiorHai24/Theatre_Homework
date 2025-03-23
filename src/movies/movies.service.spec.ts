@@ -123,7 +123,7 @@ describe('MoviesService', () => {
 
       const result = await service.update('Test Movie', updateMovieDto);
 
-      expect(result).toEqual({ message: 'Movie Test Movie has been successfully updated' });
+      expect(result).toEqual({ message: 'Movie "Test Movie" has been successfully updated' });
       expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
         where: { title: 'Test Movie' },
         relations: ['showtimes'],

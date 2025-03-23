@@ -24,6 +24,7 @@ describe('ShowtimesService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     delete: jest.fn(),
+    remove: jest.fn(),
   };
 
   const mockMovieRepository = {
@@ -40,9 +41,11 @@ describe('ShowtimesService', () => {
   const mockBookingRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ShowtimesService,
@@ -243,19 +246,56 @@ describe('ShowtimesService', () => {
   });
 
   describe('remove', () => {
-    it('should remove a showtime', async () => {
-      mockShowtimeRepository.delete.mockResolvedValue({ affected: 1 });
+    it('should remove a showtime and its bookings', async () => {
+      const showtime = {
+        id: 1,
+        bookings: [
+          { id: 'booking1' },
+          { id: 'booking2' }
+        ]
+      };
+
+      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+      mockBookingRepository.remove.mockResolvedValue(showtime.bookings);
+      mockShowtimeRepository.remove.mockResolvedValue(showtime);
 
       const result = await service.remove(1);
 
       expect(result).toEqual({ message: 'Showtime with ID 1 has been successfully deleted' });
-      expect(mockShowtimeRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['bookings'],
+      });
+      expect(mockBookingRepository.remove).toHaveBeenCalledWith(showtime.bookings);
+      expect(mockShowtimeRepository.remove).toHaveBeenCalledWith(showtime);
+    });
+
+    it('should remove a showtime without bookings', async () => {
+      const showtime = {
+        id: 1,
+        bookings: []
+      };
+
+      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+      mockShowtimeRepository.remove.mockResolvedValue(showtime);
+
+      const result = await service.remove(1);
+
+      expect(result).toEqual({ message: 'Showtime with ID 1 has been successfully deleted' });
+      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['bookings'],
+      });
+      expect(mockBookingRepository.remove).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.remove).toHaveBeenCalledWith(showtime);
     });
 
     it('should throw NotFoundException when showtime is not found', async () => {
-      mockShowtimeRepository.delete.mockResolvedValue({ affected: 0 });
+      mockShowtimeRepository.findOne.mockResolvedValue(null);
 
       await expect(service.remove(1)).rejects.toThrow(NotFoundException);
+      expect(mockBookingRepository.remove).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.remove).not.toHaveBeenCalled();
     });
   });
 

@@ -81,7 +81,7 @@ export class MoviesService {
     Object.assign(movie, updateMovieDto);
     await this.movieRepository.save(movie);
 
-    return { message :`Movie ${movieTitle} has been successfully updated`}
+    return { message :`Movie "${movieTitle}" has been successfully updated`}
   }
 
   async remove(movieTitle: string): Promise<{ message: string }> {

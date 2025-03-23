@@ -159,12 +159,22 @@ export class ShowtimesService {
   }
 
   async remove(id: number): Promise<{ message: string }> {
-    const result = await this.showtimeRepository.delete(id);
+    const showtime = await this.showtimeRepository.findOne({
+      where: { id },
+      relations: ['bookings'],
+    });
 
-    if (result.affected === 0) {
+    if (!showtime) {
       throw new NotFoundException(`Showtime with ID ${id} not found`);
     }
 
+    // Delete all bookings associated with this showtime
+    if (showtime.bookings && showtime.bookings.length > 0) {
+      await this.bookingRepository.remove(showtime.bookings);
+    }
+
+    // Now delete the showtime
+    await this.showtimeRepository.remove(showtime);
     return { message: `Showtime with ID ${id} has been successfully deleted` };
   }
 

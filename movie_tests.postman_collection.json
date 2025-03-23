@@ -1,0 +1,441 @@
+{
+  "info": {
+    "name": "Popcorn Palace API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Create Movies",
+          "item": [
+            {
+              "name": "Create Movie 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"The Dark Knight\",\n    \"genre\": \"Action\",\n    \"duration\": 152,\n    \"rating\": 9.0,\n    \"release_year\": 2008\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/movies",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies"]
+                }
+              }
+            },
+            {
+              "name": "Create Movie 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Inception\",\n    \"genre\": \"Sci-Fi\",\n    \"duration\": 148,\n    \"rating\": 8.8,\n    \"release_year\": 2010\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/movies",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Movies",
+          "item": [
+            {
+              "name": "Get All Movies",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/movies/all",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "all"]
+                }
+              }
+            },
+            {
+              "name": "Get Movie by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/movies/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Movies",
+          "item": [
+            {
+              "name": "Update The Dark Knight",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rating\": 9.1,\n    \"duration\": 153\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/movies/update/The Dark Knight",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "update", "The Dark Knight"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Theaters",
+      "item": [
+        {
+          "name": "Create Theaters",
+          "item": [
+            {
+              "name": "Create Theater 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"IMAX Theater\",\n    \"rows\": 15,\n    \"seatsPerRow\": 20\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters"]
+                }
+              }
+            },
+            {
+              "name": "Create Theater 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Standard Theater\",\n    \"rows\": 12,\n    \"seatsPerRow\": 16\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Theaters",
+          "item": [
+            {
+              "name": "Get All Theaters",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters"]
+                }
+              }
+            },
+            {
+              "name": "Get Theater by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/theaters/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "theaters", "1"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Showtimes",
+      "item": [
+        {
+          "name": "Create Showtimes",
+          "item": [
+            {
+              "name": "Create Showtime 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"movieId\": 1,\n    \"theater\": \"IMAX Theater\",\n    \"startTime\": \"2024-03-25T14:00:00Z\",\n    \"endTime\": \"2024-03-25T16:32:00Z\",\n    \"price\": 15.99\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes"]
+                }
+              }
+            },
+            {
+              "name": "Create Showtime 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"movieId\": 2,\n    \"theater\": \"Standard Theater\",\n    \"startTime\": \"2024-03-25T17:00:00Z\",\n    \"endTime\": \"2024-03-25T19:28:00Z\",\n    \"price\": 12.99\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Showtimes",
+          "item": [
+            {
+              "name": "Get Showtimes by Movie",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/movie/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "movie", "1"]
+                }
+              }
+            },
+            {
+              "name": "Get Showtime by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Showtimes",
+          "item": [
+            {
+              "name": "Update Showtime 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"price\": 16.99\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/showtimes/update/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "update", "1"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Bookings",
+          "item": [
+            {
+              "name": "Create Booking 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 1,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/bookings",
+                  "host": ["{{base_url}}"],
+                  "path": ["bookings"]
+                }
+              }
+            },
+            {
+              "name": "Create Booking 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"showtimeId\": 2,\n    \"seatNumber\": 2,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440001\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/bookings",
+                  "host": ["{{base_url}}"],
+                  "path": ["bookings"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete Bookings",
+          "item": [
+            {
+              "name": "Delete Booking 1",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/bookings/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["bookings", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Booking 2",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/bookings/2",
+                  "host": ["{{base_url}}"],
+                  "path": ["bookings", "2"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Showtimes",
+          "item": [
+            {
+              "name": "Delete Showtime 1",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Showtime 2",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/showtimes/2",
+                  "host": ["{{base_url}}"],
+                  "path": ["showtimes", "2"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Movies",
+          "item": [
+            {
+              "name": "Delete Movie 1",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/movies/The Dark Knight",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "The Dark Knight"]
+                }
+              }
+            },
+            {
+              "name": "Delete Movie 2",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/movies/Inception",
+                  "host": ["{{base_url}}"],
+                  "path": ["movies", "Inception"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    }
+  ]
+} 
