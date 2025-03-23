@@ -16,6 +16,15 @@ export class MoviesService {
   ) {}
 
   async create(createMovieDto: CreateMovieDto): Promise<Movie> {
+    // Check if movie with same title already exists
+    const existingMovie = await this.movieRepository.findOne({
+      where: { title: createMovieDto.title },
+    });
+
+    if (existingMovie) {
+      throw new BadRequestException(`A movie with title "${createMovieDto.title}" already exists`);
+    }
+
     const movie = this.movieRepository.create(createMovieDto);
     return this.movieRepository.save(movie);
   }
@@ -45,6 +54,17 @@ export class MoviesService {
 
     if (!movie) {
       throw new NotFoundException(`Movie with title "${movieTitle}" not found`);
+    }
+
+    // If title is being updated, check if new title already exists
+    if (updateMovieDto.title && updateMovieDto.title !== movieTitle) {
+      const existingMovie = await this.movieRepository.findOne({
+        where: { title: updateMovieDto.title },
+      });
+
+      if (existingMovie) {
+        throw new BadRequestException(`A movie with title "${updateMovieDto.title}" already exists`);
+      }
     }
 
     // If duration is being updated, check all future showtimes
@@ -81,7 +101,7 @@ export class MoviesService {
     Object.assign(movie, updateMovieDto);
     await this.movieRepository.save(movie);
 
-    return { message :`Movie "${movieTitle}" has been successfully updated`}
+    return { message: `Movie "${movieTitle}" has been successfully updated` };
   }
 
   async remove(movieTitle: string): Promise<{ message: string }> {

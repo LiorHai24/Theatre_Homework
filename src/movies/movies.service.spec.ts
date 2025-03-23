@@ -29,6 +29,7 @@ describe('MoviesService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MoviesService,
@@ -63,14 +64,38 @@ describe('MoviesService', () => {
       };
 
       const movie = { id: 1, ...createMovieDto };
+      mockMovieRepository.findOne.mockResolvedValue(null);
       mockMovieRepository.create.mockReturnValue(movie);
       mockMovieRepository.save.mockResolvedValue(movie);
 
       const result = await service.create(createMovieDto);
 
       expect(result).toEqual(movie);
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: createMovieDto.title },
+      });
       expect(mockMovieRepository.create).toHaveBeenCalledWith(createMovieDto);
       expect(mockMovieRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when movie title already exists', async () => {
+      const createMovieDto: CreateMovieDto = {
+        title: 'Existing Movie',
+        genre: 'Action',
+        duration: 120,
+        rating: 4.5,
+        release_year: 2024,
+      };
+
+      const existingMovie = { id: 1, title: 'Existing Movie' };
+      mockMovieRepository.findOne.mockResolvedValue(existingMovie);
+
+      await expect(service.create(createMovieDto)).rejects.toThrow(BadRequestException);
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: createMovieDto.title },
+      });
+      expect(mockMovieRepository.create).not.toHaveBeenCalled();
+      expect(mockMovieRepository.save).not.toHaveBeenCalled();
     });
   });
 
@@ -118,7 +143,8 @@ describe('MoviesService', () => {
       };
 
       const movie = { id: 1, title: 'Test Movie', duration: 120, showtimes: [] };
-      mockMovieRepository.findOne.mockResolvedValue(movie);
+      mockMovieRepository.findOne.mockResolvedValueOnce(movie); // First call for finding the movie to update
+      mockMovieRepository.findOne.mockResolvedValueOnce(null); // Second call for checking if new title exists
       mockMovieRepository.save.mockResolvedValue({ ...movie, ...updateMovieDto });
 
       const result = await service.update('Test Movie', updateMovieDto);
@@ -131,10 +157,26 @@ describe('MoviesService', () => {
       expect(mockMovieRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when movie is not found', async () => {
-      mockMovieRepository.findOne.mockResolvedValue(null);
+    it('should throw BadRequestException when updating to an existing title', async () => {
+      const updateMovieDto: UpdateMovieDto = {
+        title: 'Existing Movie',
+      };
 
-      await expect(service.update('Non-existent Movie', {})).rejects.toThrow(NotFoundException);
+      const movie = { id: 1, title: 'Test Movie', duration: 120, showtimes: [] };
+      const existingMovie = { id: 2, title: 'Existing Movie' };
+      
+      mockMovieRepository.findOne.mockResolvedValueOnce(movie); // First call for finding the movie to update
+      mockMovieRepository.findOne.mockResolvedValueOnce(existingMovie); // Second call for checking if new title exists
+
+      await expect(service.update('Test Movie', updateMovieDto)).rejects.toThrow(BadRequestException);
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: 'Test Movie' },
+        relations: ['showtimes'],
+      });
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { title: updateMovieDto.title },
+      });
+      expect(mockMovieRepository.save).not.toHaveBeenCalled();
     });
 
     it('should validate showtime durations when updating movie duration', async () => {
