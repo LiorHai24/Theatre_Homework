@@ -3,6 +3,10 @@
 ## Overview
 Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation.
 
+I took it to my own personal direction with adding a theater as an object(you can see the api in this file for creation and view of the existing theaters)with number of rows, seats per row, and total capacity, getting a unique id upon creation.
+I believed it would be more realistic to have objects in the code, also implemented movies and showtime, so for a showtime object you can see all the neccessary details.
+Moreover, for updating and deletion, in addition to the status code 200 of success, there is also a matching message.
+
 ## API Endpoints
 
 ### Movies
@@ -37,7 +41,17 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
   "release_year": 2024
 }
 ```
-- **Response**: Created movie object
+- **Response**: Created movie object with ID
+```json
+{
+  "id": 1,
+  "title": "Sample Movie",
+  "genre": "Action",
+  "duration": 120,
+  "rating": 8.5,
+  "release_year": 2024
+}
+```
 
 #### Update Movie
 - **Endpoint**: `POST /movies/update/{movieTitle}`
@@ -52,12 +66,22 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
   "release_year": 2024
 }
 ```
-- **Response**: Updated movie object
+- **Response**: Success message
+```json
+{
+  "message": "Movie \"Sample Movie\" has been successfully updated"
+}
+```
 
 #### Delete Movie
 - **Endpoint**: `DELETE /movies/{movieTitle}`
 - **Description**: Deletes a movie by title
 - **Response**: Success message
+```json
+{
+  "message": "Movie \"Sample Movie\" has been successfully deleted"
+}
+```
 
 ### Theaters
 
@@ -72,7 +96,16 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
   "seatsPerRow": 15
 }
 ```
-- **Response**: Created theater object
+- **Response**: Created theater object with ID
+```json
+{
+  "id": 1,
+  "name": "Sample Theater",
+  "rows": 10,
+  "seatsPerRow": 15,
+  "capacity": 150
+}
+```
 
 #### Get All Theaters
 - **Endpoint**: `GET /showtimes/theaters`
@@ -103,6 +136,7 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 - **Response**: Showtime object with movie and theater details
 
 #### Add Showtime
+(notice that upon creation movie duration must match the length of the showtime, otherwise won't create the showtime.)
 - **Endpoint**: `POST /showtimes`
 - **Description**: Creates a new showtime
 - **Request Body**:
@@ -115,7 +149,31 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
   "endTime": "2024-02-14T13:47:46.125405Z"
 }
 ```
-- **Response**: Created showtime object
+- **Response**: Created showtime object with ID
+```json
+{
+  "id": 1,
+  "movie": {
+    "id": 1,
+    "title": "Sample Movie",
+    "genre": "Action",
+    "duration": 120,
+    "rating": 8.5,
+    "release_year": 2024
+  },
+  "theater": {
+    "id": 1,
+    "name": "Sample Theater",
+    "rows": 10,
+    "seatsPerRow": 15,
+    "capacity": 150
+  },
+  "start_time": "2024-02-14T11:47:46.125405Z",
+  "end_time": "2024-02-14T13:47:46.125405Z",
+  "price": 20.2,
+  "availableSeats": 150
+}
+```
 
 #### Update Showtime
 - **Endpoint**: `POST /showtimes/update/{id}`
@@ -131,11 +189,18 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 }
 ```
 - **Response**: Updated showtime object
-
+{
+     message: `Showtime with ID 1 has been successfully updated`
+}
 #### Delete Showtime
 - **Endpoint**: `DELETE /showtimes/{id}`
 - **Description**: Deletes a showtime by ID
 - **Response**: Success message
+```json
+{
+  "message": "Showtime with ID 1 has been successfully deleted"
+}
+```
 
 ### Bookings
 

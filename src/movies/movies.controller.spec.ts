@@ -99,7 +99,7 @@ describe('MoviesController', () => {
         rating: 9.0,
       };
 
-      const expectedResult = { id: 1, ...updateMovieDto };
+      const expectedResult = { message: 'Movie "Test Movie" has been successfully updated' };
       mockMoviesService.update.mockResolvedValue(expectedResult);
 
       const result = await controller.update('Test Movie', updateMovieDto);

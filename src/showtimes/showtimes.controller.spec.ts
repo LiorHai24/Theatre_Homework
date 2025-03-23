@@ -92,7 +92,7 @@ describe('ShowtimesController', () => {
       const updateShowtimeDto: UpdateShowtimeDto = {
         price: 14.99,
       };
-      const expectedResult = { id: 1, ...updateShowtimeDto };
+      const expectedResult = { message: 'Showtime with ID "1" has been successfully updated' };
       mockShowtimesService.update.mockResolvedValue(expectedResult);
 
       const result = await controller.update('1', updateShowtimeDto);

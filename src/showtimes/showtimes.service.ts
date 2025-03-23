@@ -109,7 +109,7 @@ export class ShowtimesService {
     return showtime;
   }
 
-  async update(id: number, updateShowtimeDto: UpdateShowtimeDto): Promise<Showtime> {
+  async update(id: number, updateShowtimeDto: UpdateShowtimeDto): Promise<{message: string}> {
     const showtime = await this.showtimeRepository.findOne({
       where: { id },
       relations: ['movie', 'theater'],
@@ -154,8 +154,8 @@ export class ShowtimesService {
     if (updateShowtimeDto.price) {
       showtime.price = updateShowtimeDto.price;
     }
-
-    return this.showtimeRepository.save(showtime);
+    await this.showtimeRepository.save(showtime);
+    return { message: `Showtime with ID ${id} has been successfully updated` };
   }
 
   async remove(id: number): Promise<{ message: string }> {

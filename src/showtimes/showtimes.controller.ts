@@ -41,7 +41,7 @@ export class ShowtimesController {
   }
 
   @Post('update/:id')
-  update(@Param('id') id: string, @Body() updateShowtimeDto: UpdateShowtimeDto): Promise<Showtime> {
+  update(@Param('id') id: string, @Body() updateShowtimeDto: UpdateShowtimeDto): Promise<{ message: string }> {
     return this.showtimesService.update(+id, updateShowtimeDto);
   }
 

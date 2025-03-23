@@ -215,16 +215,15 @@ describe('ShowtimesService', () => {
       };
       const movie = { id: 2, duration: 180 };
       const theater = { id: 2, name: 'New Theater' };
-      const updatedShowtime = { id: 1, ...updateShowtimeDto, movie, theater };
 
       mockShowtimeRepository.findOne.mockResolvedValue(existingShowtime);
       mockMovieRepository.findOne.mockResolvedValue(movie);
       mockTheaterRepository.findOne.mockResolvedValue(theater);
-      mockShowtimeRepository.save.mockResolvedValue(updatedShowtime);
+      mockShowtimeRepository.save.mockResolvedValue({ ...existingShowtime, ...updateShowtimeDto, movie, theater });
 
       const result = await service.update(1, updateShowtimeDto);
 
-      expect(result).toEqual(updatedShowtime);
+      expect(result).toEqual({ message: 'Showtime with ID 1 has been successfully updated' });
       expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
         relations: ['movie', 'theater'],
