@@ -1,7 +1,7 @@
 # Popcorn Palace - Movie Theater Booking System
 
 ## Overview
-Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation.
+Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation. The system ensures that showtime durations match their corresponding movie durations and handles theater capacity management.
 
 I took it to my own personal direction with adding a theater as an object(you can see the api in this file for creation and view of the existing theaters)with number of rows, seats per row, and total capacity, getting a unique id upon creation.
 I believed it would be more realistic to have objects in the code, also implemented movies and showtime, so for a showtime object you can see all the neccessary details.
@@ -10,197 +10,110 @@ Moreover, for updating and deletion, in addition to the status code 200 of succe
 ## API Endpoints
 
 ### Movies
+- **Create Movie**
+  - **Endpoint**: `POST /movies`
+  - **Request Body**:
+    ```json
+    {
+      "title": "The Matrix",
+      "genre": "Action",
+      "duration": 120,
+      "rating": 8.5,
+      "release_year": 2024
+    }
+    ```
+  - **Response**: Created movie object
 
-#### Get All Movies
-- **Endpoint**: `GET /movies/all`
-- **Description**: Retrieves all movies in the system
-- **Response**: Array of movie objects
-```json
-[
-  {
-    "id": 1,
-    "title": "Sample Movie",
-    "genre": "Action",
-    "duration": 120,
-    "rating": 8.5,
-    "release_year": 2024
-  }
-]
-```
+- **Get All Movies**
+  - **Endpoint**: `GET /movies/all`
+  - **Response**: Array of movie objects
 
-#### Add Movie
-- **Endpoint**: `POST /movies`
-- **Description**: Adds a new movie to the system
-- **Request Body**:
-```json
-{
-  "title": "Sample Movie",
-  "genre": "Action",
-  "duration": 120,
-  "rating": 8.5,
-  "release_year": 2024
-}
-```
-- **Response**: Created movie object with ID
-```json
-{
-  "id": 1,
-  "title": "Sample Movie",
-  "genre": "Action",
-  "duration": 120,
-  "rating": 8.5,
-  "release_year": 2024
-}
-```
+- **Get Movie by ID**
+  - **Endpoint**: `GET /movies/{id}`
+  - **Response**: Movie object
 
-#### Update Movie
-- **Endpoint**: `POST /movies/update/{movieTitle}`
-- **Description**: Updates an existing movie by title
-- **Request Body**:
-```json
-{
-  "title": "Updated Movie Title",
-  "genre": "Action",
-  "duration": 120,
-  "rating": 8.5,
-  "release_year": 2024
-}
-```
-- **Response**: Success message
-```json
-{
-  "message": "Movie \"Sample Movie\" has been successfully updated"
-}
-```
+- **Update Movie**
+  - **Endpoint**: `POST /movies/update/{movieTitle}`
+  - **Request Body**: Partial movie object
+  - **Response**: Success message object
+    ```json
+    {
+      "message": "Movie \"The Matrix\" has been successfully updated"
+    }
+    ```
 
-#### Delete Movie
-- **Endpoint**: `DELETE /movies/{movieTitle}`
-- **Description**: Deletes a movie by title
-- **Response**: Success message
-```json
-{
-  "message": "Movie \"Sample Movie\" has been successfully deleted"
-}
-```
+- **Delete Movie**
+  - **Endpoint**: `DELETE /movies/{movieTitle}`
+  - **Response**: Success message object
+    ```json
+    {
+      "message": "Movie \"The Matrix\" has been successfully deleted"
+    }
+    ```
 
-### Theaters
+### Theater
+- **Create Theater**
+  - **Endpoint**: `POST /showtimes/theater`
+  - **Request Body**:
+    ```json
+    {
+      "name": "Theater 1",
+      "capacity": 100,
+      "rows": 10,
+      "seatsPerRow": 10
+    }
+    ```
+  - **Response**: Created theater object
 
-#### Create Theater
-- **Endpoint**: `POST /showtimes/theaters`
-- **Description**: Creates a new theater
-- **Request Body**:
-```json
-{
-  "name": "Sample Theater",
-  "rows": 10,
-  "seatsPerRow": 15
-}
-```
-- **Response**: Created theater object with ID
-```json
-{
-  "id": 1,
-  "name": "Sample Theater",
-  "rows": 10,
-  "seatsPerRow": 15,
-  "capacity": 150
-}
-```
+- **Get All Theaters**
+  - **Endpoint**: `GET /showtimes/theater/all`
+  - **Response**: Array of theater objects
 
-#### Get All Theaters
-- **Endpoint**: `GET /showtimes/theaters`
-- **Description**: Retrieves all theaters
-- **Response**: Array of theater objects
-```json
-[
-  {
-    "id": 1,
-    "name": "Sample Theater",
-    "rows": 10,
-    "seatsPerRow": 15,
-    "capacity": 150
-  }
-]
-```
-
-#### Get Theater by ID
-- **Endpoint**: `GET /showtimes/theaters/{id}`
-- **Description**: Retrieves a specific theater by ID
-- **Response**: Theater object
+- **Get Theater by Name**
+  - **Endpoint**: `GET /showtimes/theater/{theaterName}`
+  - **Response**: Theater object
 
 ### Showtimes
+- **Create Showtime**
+  - **Endpoint**: `POST /showtimes`
+  - **Request Body**:
+    ```json
+    {
+      "movie": 1,
+      "theater": "Theater 1",
+      "start_time": "2024-03-20T14:00:00",
+      "end_time": "2024-03-20T16:00:00",
+      "price": 12.99
+    }
+    ```
+  - **Response**: Created showtime object
 
-#### Get Showtime by ID
-- **Endpoint**: `GET /showtimes/{id}`
-- **Description**: Retrieves a specific showtime by ID
-- **Response**: Showtime object with movie and theater details
+- **Get Showtime by ID**
+  - **Endpoint**: `GET /showtimes/{id}`
+  - **Response**: Showtime object
 
-#### Add Showtime
-(notice that upon creation movie duration must match the length of the showtime, otherwise won't create the showtime.)
-- **Endpoint**: `POST /showtimes`
-- **Description**: Creates a new showtime
-- **Request Body**:
-```json
-{
-  "movieId": 1,
-  "price": 20.2,
-  "theater": "Sample Theater",
-  "startTime": "2024-02-14T11:47:46.125405Z",
-  "endTime": "2024-02-14T13:47:46.125405Z"
-}
-```
-- **Response**: Created showtime object with ID
-```json
-{
-  "id": 1,
-  "movie": {
-    "id": 1,
-    "title": "Sample Movie",
-    "genre": "Action",
-    "duration": 120,
-    "rating": 8.5,
-    "release_year": 2024
-  },
-  "theater": {
-    "id": 1,
-    "name": "Sample Theater",
-    "rows": 10,
-    "seatsPerRow": 15,
-    "capacity": 150
-  },
-  "start_time": "2024-02-14T11:47:46.125405Z",
-  "end_time": "2024-02-14T13:47:46.125405Z",
-  "price": 20.2,
-  "availableSeats": 150
-}
-```
+- **Get Showtimes by Movie**
+  - **Endpoint**: `GET /showtimes/movie/{id}`
+  - **Response**: Array of showtime objects
 
-#### Update Showtime
-- **Endpoint**: `POST /showtimes/update/{id}`
-- **Description**: Updates an existing showtime
-- **Request Body**:
-```json
-{
-  "movieId": 1,
-  "price": 20.2,
-  "theater": "Sample Theater",
-  "startTime": "2024-02-14T11:47:46.125405Z",
-  "endTime": "2024-02-14T13:47:46.125405Z"
-}
-```
-- **Response**: Updated showtime object
-{
-     message: `Showtime with ID 1 has been successfully updated`
-}
-#### Delete Showtime
-- **Endpoint**: `DELETE /showtimes/{id}`
-- **Description**: Deletes a showtime by ID
-- **Response**: Success message
-```json
-{
-  "message": "Showtime with ID 1 has been successfully deleted"
-}
-```
+- **Update Showtime**
+  - **Endpoint**: `POST /showtimes/update/{id}`
+  - **Request Body**: Partial showtime object
+  - **Response**: Success message object
+    ```json
+    {
+      "message": "Showtime with ID 1 has been successfully updated"
+    }
+    ```
+
+- **Delete Showtime**
+  - **Endpoint**: `DELETE /showtimes/{id}`
+  - **Response**: Success message object
+    ```json
+    {
+      "message": "Showtime with ID 1 has been successfully deleted"
+    }
+    ```
 
 ### Bookings
 
@@ -227,57 +140,74 @@ Moreover, for updating and deletion, in addition to the status code 200 of succe
 ### Movie
 ```typescript
 {
-  id: number;
-  title: string;
-  genre: string;
-  duration: number;
-  rating: number;
-  release_year: number;
+  id: number;          // Primary key
+  title: string;       // Used for update/delete operations
+  genre: string;       // Movie genre
+  duration: number;    // Duration in minutes
+  rating: number;      // Movie rating
+  release_year: number; // Year of release
 }
 ```
 
 ### Theater
 ```typescript
 {
-  id: number;
-  name: string;
-  rows: number;
-  seatsPerRow: number;
-  capacity: number;
+  name: string;        // Primary key
+  rows: number;        // Number of rows in the theater
+  seatsPerRow: number; // Number of seats per row
+  capacity: number;    // Automatically calculated as rows * seatsPerRow
 }
 ```
 
 ### Showtime
 ```typescript
 {
-  id: number;
-  movie: Movie;
-  theater: Theater;
-  start_time: Date;
-  end_time: Date;
-  price: number;
-  availableSeats: number;
+  id: number;          // Primary key
+  movie: Movie;        // Reference to Movie entity
+  theater: Theater;    // Reference to Theater entity
+  start_time: Date;    // Showtime start
+  end_time: Date;      // Must match movie duration (within 5 minutes tolerance)
+  price: number;       // Ticket price
+  availableSeats: number; // Number of available seats
 }
 ```
 
 ### Booking
 ```typescript
 {
-  id: string; // UUID
-  showtime: Showtime;
-  seatNumber: number;
-  userId: string; // UUID
+  id: string;          // UUID primary key
+  showtime: Showtime;  // Reference to Showtime entity
+  seatNumber: number;  // Selected seat number
+  userId: string;      // User identifier
+  bookingTime: Date;   // Time of booking
 }
 ```
 
 ## Validation Rules
-1. Movie duration must match showtime duration (within 5 minutes tolerance)
-2. Showtimes cannot overlap in the same theater
-3. Seat numbers must be valid (between 1 and theater capacity)
-4. Seats cannot be double-booked
-5. User IDs must be valid UUIDs
-6. Theater names must be unique
-7. Movie titles must be unique
+
+1. Showtime Duration:
+   - The duration between start_time and end_time must match the movie's duration
+   - A 5-minute tolerance is allowed for small discrepancies
+   - If the duration doesn't match, a BadRequestException is thrown
+
+2. Theater Capacity:
+   - Theater capacity is automatically calculated as rows * seatsPerRow
+   - Showtimes cannot be created if the theater has no available seats
+   - Available seats are tracked per showtime
+
+3. Theater Names:
+   - Theater names must be unique
+   - Theater names are used as primary keys
+   - Theater names are case-sensitive
+
+4. Showtime Overlap:
+   - No overlapping showtimes are allowed in the same theater
+   - A BadRequestException is thrown if there's an overlap
+
+5. Seat Validation:
+   - Seat numbers must be valid for the theater's capacity
+   - No duplicate bookings for the same seat in a showtime
+   - Available seats count is updated when bookings are made
 
 ## Error Handling
 - 400 Bad Request: Invalid input data
