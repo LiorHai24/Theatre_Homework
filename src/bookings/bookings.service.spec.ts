@@ -203,5 +203,48 @@ describe('BookingsService', () => {
       expect(mockBookingRepository.save).not.toHaveBeenCalled();
       expect(mockShowtimeRepository.save).not.toHaveBeenCalled();
     });
+
+    it('should prevent double booking of the same seat', async () => {
+      const createBookingDto: CreateBookingDto = {
+        showtimeId: 1,
+        seatNumber: 1,
+        userId: '123e4567-e89b-12d3-a456-426614174000',
+      };
+
+      const showtime = {
+        id: 1,
+        availableSeats: 100,
+        theater: { capacity: 100 },
+        bookings: [],
+      };
+
+      const existingBooking = {
+        id: 'existing-booking-id',
+        seatNumber: 1,
+        userId: '550e8400-e29b-41d4-a716-446655440000',
+        showtime: { id: 1 }
+      };
+
+      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+      mockBookingRepository.findOne.mockResolvedValue(existingBooking);
+
+      await expect(service.create(createBookingDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createBookingDto)).rejects.toThrowError('Seat 1 is already booked for this showtime');
+
+      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
+        where: { id: createBookingDto.showtimeId },
+        relations: ['theater', 'bookings'],
+      });
+      expect(mockBookingRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          showtime: { id: createBookingDto.showtimeId },
+          seatNumber: createBookingDto.seatNumber,
+        },
+        relations: ['showtime'],
+      });
+      expect(mockBookingRepository.create).not.toHaveBeenCalled();
+      expect(mockBookingRepository.save).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.save).not.toHaveBeenCalled();
+    });
   });
 }); 
