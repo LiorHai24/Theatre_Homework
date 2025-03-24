@@ -328,17 +328,43 @@ describe('ShowtimesService', () => {
         capacity: 150,
       };
 
+      mockTheaterRepository.findOne.mockResolvedValue(null);
       mockTheaterRepository.create.mockReturnValue(theater);
       mockTheaterRepository.save.mockResolvedValue(theater);
 
       const result = await service.createTheater(createTheaterDto);
 
       expect(result).toEqual(theater);
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { name: createTheaterDto.name },
+      });
       expect(mockTheaterRepository.create).toHaveBeenCalledWith({
         ...createTheaterDto,
         capacity: 150,
       });
       expect(mockTheaterRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when theater name already exists', async () => {
+      const createTheaterDto: CreateTheaterDto = {
+        name: 'Existing Theater',
+        rows: 10,
+        seatsPerRow: 15,
+      };
+
+      const existingTheater = {
+        name: 'Existing Theater',
+        capacity: 100,
+      };
+
+      mockTheaterRepository.findOne.mockResolvedValue(existingTheater);
+
+      await expect(service.createTheater(createTheaterDto)).rejects.toThrow(BadRequestException);
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { name: createTheaterDto.name },
+      });
+      expect(mockTheaterRepository.create).not.toHaveBeenCalled();
+      expect(mockTheaterRepository.save).not.toHaveBeenCalled();
     });
   });
 

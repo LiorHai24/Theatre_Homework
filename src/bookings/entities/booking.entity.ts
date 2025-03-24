@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Showtime } from '../../showtimes/entities/showtime.entity';
 
 @Entity()
@@ -11,8 +11,9 @@ export class Booking {
 
   @Column()
   userId: string;
-
-  @ManyToOne(() => Showtime, showtime => showtime.bookings)
+  
+  @ManyToOne(() => Showtime, (showtime) => showtime.bookings, { cascade: false })
+  @JoinColumn({ name: 'showtimeId' })
   showtime: Showtime;
 
   @CreateDateColumn()
@@ -20,4 +21,4 @@ export class Booking {
 
   @UpdateDateColumn()
   updatedAt: Date;
-} 
+}

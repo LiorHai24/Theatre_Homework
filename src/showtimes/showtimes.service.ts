@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOperator, LessThanOrEqual, MoreThanOrEqual, Between } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Showtime } from './entities/showtime.entity';
 import { Movie } from '../movies/entities/movie.entity';
 import { Theater } from './entities/theater.entity';
@@ -154,6 +154,7 @@ export class ShowtimesService {
       showtime.price = updateShowtimeDto.price;
     }
     await this.showtimeRepository.save(showtime);
+    HttpStatus.OK
     return { message: `Showtime with ID ${id} has been successfully updated` };
   }
 
@@ -176,6 +177,14 @@ export class ShowtimesService {
   }
 
   async createTheater(createTheaterDto: CreateTheaterDto): Promise<Theater> {
+    const existingTheater = await this.theaterRepository.findOne({
+      where: { name: createTheaterDto.name },
+    });
+
+    if (existingTheater) {
+      throw new BadRequestException(`A theater with the name "${createTheaterDto.name}" already exists`);
+    }
+
     const theater = this.theaterRepository.create({
       ...createTheaterDto,
       capacity: createTheaterDto.rows * createTheaterDto.seatsPerRow,

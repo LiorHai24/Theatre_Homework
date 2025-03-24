@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -55,6 +55,7 @@ export class MoviesController {
   }
 
   @Post('update/:movieTitle')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('movieTitle') movieTitle: string,
     @Body() updateMovieDto: UpdateMovieDto,

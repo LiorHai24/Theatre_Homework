@@ -5,6 +5,7 @@ import { Movie } from './entities/movie.entity';
 import { Showtime } from '../showtimes/entities/showtime.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { HttpStatus } from '@nestjs/common';
 
 @Injectable()
 export class MoviesService {
@@ -100,7 +101,7 @@ export class MoviesService {
     // Update the movie
     Object.assign(movie, updateMovieDto);
     await this.movieRepository.save(movie);
-
+    
     return { message: `Movie "${movieTitle}" has been successfully updated` };
   }
 

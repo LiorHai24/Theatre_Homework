@@ -7,6 +7,6 @@ export class CreateBookingDto {
   @IsNumber()
   seatNumber: number;
 
-  @IsUUID('4')
+  @IsUUID('4', { message: 'userId must be a valid UUID v4' })
   userId: string;
 } 

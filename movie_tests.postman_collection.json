@@ -8,101 +8,284 @@
       "name": "Movies",
       "item": [
         {
-          "name": "Create Movies",
-          "item": [
-            {
-              "name": "Create Movie 1",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"title\": \"The Dark Knight\",\n    \"genre\": \"Action\",\n    \"duration\": 152,\n    \"rating\": 9.0,\n    \"release_year\": 2008\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/movies",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies"]
-                }
+          "name": "Create Movie - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"The Matrix\",\n    \"duration\": 180,\n    \"genre\": \"Sci-Fi\",\n    \"rating\": 9.0,\n    \"release_year\": 1999\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/movies",
+              "host": ["{{base_url}}"],
+              "path": ["movies"]
+            }
+          },
+          "event": [
             {
-              "name": "Create Movie 2",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('title', 'The Matrix');",
+                  "    pm.expect(response).to.have.property('duration', 180);",
+                  "    pm.expect(response).to.have.property('genre', 'Sci-Fi');",
+                  "    pm.expect(response).to.have.property('rating', 9.0);",
+                  "    pm.expect(response).to.have.property('release_year', 1999);",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"title\": \"Inception\",\n    \"genre\": \"Sci-Fi\",\n    \"duration\": 148,\n    \"rating\": 8.8,\n    \"release_year\": 2010\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/movies",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies"]
-                }
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Get Movies",
-          "item": [
-            {
-              "name": "Get All Movies",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/movies/all",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies", "all"]
-                }
+          "name": "Create Second Movie - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Inception\",\n    \"duration\": 180,\n    \"genre\": \"Sci-Fi\",\n    \"rating\": 8.8,\n    \"release_year\": 2010\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/movies",
+              "host": ["{{base_url}}"],
+              "path": ["movies"]
+            }
+          },
+          "event": [
             {
-              "name": "Get Movie by ID",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/movies/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies", "1"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('title', 'Inception');",
+                  "    pm.expect(response).to.have.property('duration', 180);",
+                  "    pm.expect(response).to.have.property('genre', 'Sci-Fi');",
+                  "    pm.expect(response).to.have.property('rating', 8.8);",
+                  "    pm.expect(response).to.have.property('release_year', 2010);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Update Movies",
-          "item": [
+          "name": "Create Movie - Invalid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"\",\n    \"duration\": -1,\n    \"genre\": \"\",\n    \"rating\": 11,\n    \"release_year\": 1800\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/movies",
+              "host": ["{{base_url}}"],
+              "path": ["movies"]
+            }
+          },
+          "event": [
             {
-              "name": "Update The Dark Knight",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"rating\": 9.1,\n    \"duration\": 153\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/movies/update/The Dark Knight",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies", "update", "The Dark Knight"]
-                }
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/movies/all",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "all"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.response.to.be.json();",
+                  "    pm.response.to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Movie by ID - Success",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/movies/1",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('title');",
+                  "    pm.expect(response).to.have.property('duration');",
+                  "    pm.expect(response).to.have.property('genre');",
+                  "    pm.expect(response).to.have.property('rating');",
+                  "    pm.expect(response).to.have.property('release_year');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Movie by ID - Not Found",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/movies/999",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "999"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Movie - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"genre\": \"Sci-Fi\",\n    \"rating\": 9.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/movies/update/The Matrix",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "update", "The Matrix"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response.message).to.include('successfully updated');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Movie - Not Found",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"genre\": \"Sci-Fi\",\n    \"rating\": 9.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/movies/update/Non-existent Movie",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "update", "Non-existent Movie"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
@@ -110,78 +293,165 @@
       ]
     },
     {
-      "name": "Theaters",
+      "name": "Theater",
       "item": [
         {
-          "name": "Create Theaters",
-          "item": [
-            {
-              "name": "Create Theater 1",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"name\": \"IMAX Theater\",\n    \"rows\": 15,\n    \"seatsPerRow\": 20\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/showtimes/theaters",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "theaters"]
-                }
+          "name": "Create Theater - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Theater 1\",\n    \"rows\": 10,\n    \"seatsPerRow\": 10\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/showtimes/theater",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theater"]
+            }
+          },
+          "event": [
             {
-              "name": "Create Theater 2",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('name', 'Theater 1');",
+                  "    pm.expect(response).to.have.property('capacity', 100);",
+                  "    pm.expect(response).to.have.property('rows', 10);",
+                  "    pm.expect(response).to.have.property('seatsPerRow', 10);",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"name\": \"Standard Theater\",\n    \"rows\": 12,\n    \"seatsPerRow\": 16\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/showtimes/theaters",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "theaters"]
-                }
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Get Theaters",
-          "item": [
-            {
-              "name": "Get All Theaters",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/theaters",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "theaters"]
-                }
+          "name": "Create Theater - Duplicate Name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Theater 1\",\n    \"rows\": 10,\n    \"seatsPerRow\": 10\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/showtimes/theater",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theater"]
+            }
+          },
+          "event": [
             {
-              "name": "Get Theater by ID",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/theaters/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "theaters", "1"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Theaters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/showtimes/theater/all",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theater", "all"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.response.to.be.json();",
+                  "    pm.response.to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Theater by Name - Success",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/showtimes/theater/Theater 1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theater", "Theater 1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('name', 'Theater 1');",
+                  "    pm.expect(response).to.have.property('capacity');",
+                  "    pm.expect(response).to.have.property('rows');",
+                  "    pm.expect(response).to.have.property('seatsPerRow');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Theater by Name - Not Found",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/showtimes/theater/Non-existent Theater",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "theater", "Non-existent Theater"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
@@ -192,101 +462,178 @@
       "name": "Showtimes",
       "item": [
         {
-          "name": "Create Showtimes",
-          "item": [
-            {
-              "name": "Create Showtime 1",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"movieId\": 1,\n    \"theater\": \"IMAX Theater\",\n    \"startTime\": \"2024-03-25T14:00:00Z\",\n    \"endTime\": \"2024-03-25T16:32:00Z\",\n    \"price\": 15.99\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/showtimes",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes"]
-                }
+          "name": "Create Showtime - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"theater\": \"Theater 1\",\n    \"price\": 12.99,\n    \"startTime\": \"2024-03-20T14:00:00.000Z\",\n    \"endTime\": \"2024-03-20T17:00:00.000Z\"\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/showtimes",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes"]
+            }
+          },
+          "event": [
             {
-              "name": "Create Showtime 2",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('movieId', 1);",
+                  "    pm.expect(response).to.have.property('theater');",
+                  "    pm.expect(response).to.have.property('price', 12.99);",
+                  "    pm.expect(response).to.have.property('start_time');",
+                  "    pm.expect(response).to.have.property('end_time');",
+                  "    pm.expect(response).to.have.property('availableSeats');",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"movieId\": 2,\n    \"theater\": \"Standard Theater\",\n    \"startTime\": \"2024-03-25T17:00:00Z\",\n    \"endTime\": \"2024-03-25T19:28:00Z\",\n    \"price\": 12.99\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/showtimes",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes"]
-                }
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Get Showtimes",
-          "item": [
-            {
-              "name": "Get Showtimes by Movie",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/movie/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "movie", "1"]
-                }
+          "name": "Create Showtime - Invalid Duration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"theater\": \"Theater 1\",\n    \"price\": 12.99,\n    \"startTime\": \"2024-03-20T14:00:00.000Z\",\n    \"endTime\": \"2024-03-20T15:00:00.000Z\"\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/showtimes",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes"]
+            }
+          },
+          "event": [
             {
-              "name": "Get Showtime by ID",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "1"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Update Showtimes",
-          "item": [
+          "name": "Create Showtime - Overlapping Time",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 2,\n    \"theater\": \"Theater 1\",\n    \"price\": 12.99,\n    \"startTime\": \"2024-03-20T15:00:00.000Z\",\n    \"endTime\": \"2024-03-20T18:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/showtimes",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes"]
+            }
+          },
+          "event": [
             {
-              "name": "Update Showtime 1",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"price\": 16.99\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/showtimes/update/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "update", "1"]
-                }
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Showtime by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/showtimes/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id', 1);",
+                  "    pm.expect(response).to.have.property('movieId');",
+                  "    pm.expect(response).to.have.property('theater');",
+                  "    pm.expect(response).to.have.property('price');",
+                  "    pm.expect(response).to.have.property('start_time');",
+                  "    pm.expect(response).to.have.property('end_time');",
+                  "    pm.expect(response).to.have.property('availableSeats');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Showtimes by Movie",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/showtimes/movie/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "movie", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.response.to.be.json();",
+                  "    pm.response.to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
@@ -297,48 +644,109 @@
       "name": "Bookings",
       "item": [
         {
-          "name": "Create Bookings",
-          "item": [
-            {
-              "name": "Create Booking 1",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 1,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/bookings",
-                  "host": ["{{base_url}}"],
-                  "path": ["bookings"]
-                }
+          "name": "Create Booking - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 1,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
             },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          },
+          "event": [
             {
-              "name": "Create Booking 2",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has booking ID\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('bookingId');",
+                  "    pm.expect(response.bookingId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);",
+                  "});"
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"showtimeId\": 2,\n    \"seatNumber\": 2,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440001\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/bookings",
-                  "host": ["{{base_url}}"],
-                  "path": ["bookings"]
-                }
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Booking - Invalid Seat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 999,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Booking - Duplicate Seat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"showtimeId\": 1,\n    \"seatNumber\": 1,\n    \"userId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
@@ -349,82 +757,145 @@
       "name": "Cleanup",
       "item": [
         {
-          "name": "Delete Bookings",
-          "item": [
+          "name": "Delete Booking - Success",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/bookings/550e8400-e29b-41d4-a716-446655440000",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "550e8400-e29b-41d4-a716-446655440000"]
+            }
+          },
+          "event": [
             {
-              "name": "Delete Booking 1",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/bookings/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["bookings", "1"]
-                }
-              }
-            },
-            {
-              "name": "Delete Booking 2",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/bookings/2",
-                  "host": ["{{base_url}}"],
-                  "path": ["bookings", "2"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response.message).to.include('successfully deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Delete Showtimes",
-          "item": [
+          "name": "Delete Showtime - Success",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/showtimes/1",
+              "host": ["{{base_url}}"],
+              "path": ["showtimes", "1"]
+            }
+          },
+          "event": [
             {
-              "name": "Delete Showtime 1",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/1",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "1"]
-                }
-              }
-            },
-            {
-              "name": "Delete Showtime 2",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/showtimes/2",
-                  "host": ["{{base_url}}"],
-                  "path": ["showtimes", "2"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response.message).to.include('successfully deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]
         },
         {
-          "name": "Delete Movies",
-          "item": [
+          "name": "Delete Movie - Success",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/movies/The Matrix",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "The Matrix"]
+            }
+          },
+          "event": [
             {
-              "name": "Delete Movie 1",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/movies/The Dark Knight",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies", "The Dark Knight"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response.message).to.include('successfully deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
-            },
+            }
+          ]
+        },
+        {
+          "name": "Delete Second Movie - Success",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/movies/Inception",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "Inception"]
+            }
+          },
+          "event": [
             {
-              "name": "Delete Movie 2",
-              "request": {
-                "method": "DELETE",
-                "url": {
-                  "raw": "{{base_url}}/movies/Inception",
-                  "host": ["{{base_url}}"],
-                  "path": ["movies", "Inception"]
-                }
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response.message).to.include('successfully deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Movie - Not Found",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/movies/Non-existent Movie",
+              "host": ["{{base_url}}"],
+              "path": ["movies", "Non-existent Movie"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
           ]

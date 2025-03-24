@@ -14,7 +14,7 @@ export class Showtime {
   @Column()
   end_time: Date;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
   @Column()
@@ -34,6 +34,6 @@ export class Showtime {
   @Column()
   theaterName: string;
 
-  @OneToMany(() => Booking, (booking) => booking.showtime)
+  @OneToMany(() => Booking, (booking) => booking.showtime, { cascade: true })
   bookings: Booking[];
 } 
