@@ -197,7 +197,6 @@ describe('BookingsService', () => {
         relations: ['theater', 'bookings'],
       });
       expect(mockBookingRepository.findOne).not.toHaveBeenCalled();
-
       expect(mockBookingRepository.create).not.toHaveBeenCalled();
       expect(mockBookingRepository.save).not.toHaveBeenCalled();
       expect(mockShowtimeRepository.save).not.toHaveBeenCalled();

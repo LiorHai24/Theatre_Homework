@@ -41,18 +41,14 @@ export class ShowtimesService {
 
     const startTime = new Date(createShowtimeDto.startTime);
     const endTime = new Date(createShowtimeDto.endTime);
+    const providedDuration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // Convert to minutes and round
 
-    // Calculate duration in minutes
-    const durationInMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-    
-    // Check if duration matches movie duration (with 5 minutes tolerance)
-    if (Math.abs(durationInMinutes - movie.duration) > 5) {
+    if (Math.abs(providedDuration - movie.duration) > 5) { // Allow 5 minutes tolerance
       throw new BadRequestException(
-        `Showtime duration (${durationInMinutes} minutes) does not match movie duration (${movie.duration} minutes)`,
+        `Showtime duration must match movie duration (${movie.duration} minutes)`,
       );
     }
 
-    // Check for overlapping showtimes in the same theater
     const overlappingShowtime = await this.showtimeRepository.findOne({
       where: [
         {
@@ -72,7 +68,6 @@ export class ShowtimesService {
       );
     }
 
-    // Check if there are any available seats
     if (theater.capacity <= 0) {
       throw new BadRequestException('No available seats in this theater');
     }
@@ -97,7 +92,6 @@ export class ShowtimesService {
   }
 
   async findOne(id: number): Promise<Showtime> {
-    // Validate that id is a valid number
     if (isNaN(id) || id <= 0) {
       throw new BadRequestException('Invalid showtime ID');
     }
@@ -142,7 +136,7 @@ export class ShowtimesService {
       });
 
       if (!theater) {
-        throw new NotFoundException(`Theater with name ${updateShowtimeDto.theater} not found`);
+        throw new NotFoundException(`Theater "${updateShowtimeDto.theater}" not found`);
       }
 
       showtime.theater = theater;
@@ -173,12 +167,10 @@ export class ShowtimesService {
       throw new NotFoundException(`Showtime with ID ${id} not found`);
     }
 
-    // Delete all bookings associated with this showtime
     if (showtime.bookings && showtime.bookings.length > 0) {
       await this.bookingRepository.remove(showtime.bookings);
     }
 
-    // Now delete the showtime
     await this.showtimeRepository.remove(showtime);
     return { message: `Showtime with ID ${id} has been successfully deleted` };
   }
@@ -200,13 +192,13 @@ export class ShowtimesService {
     }
   }
 
-  async getTheaterById(id: number): Promise<Theater> {
+  async getTheaterByName(name: string): Promise<Theater> {
     const theater = await this.theaterRepository.findOne({
-      where: { id },
+      where: { name },
     });
 
     if (!theater) {
-      throw new NotFoundException(`Theater with ID ${id} not found`);
+      throw new NotFoundException(`Theater "${name}" not found`);
     }
 
     return theater;

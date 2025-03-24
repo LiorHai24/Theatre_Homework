@@ -4,12 +4,12 @@ export class CreateShowtimeDto {
   @IsNumber()
   movieId: number;
 
+  @IsString()
+  theater: string;
+
   @IsNumber()
   @Min(0)
   price: number;
-
-  @IsString()
-  theater: string;
 
   @IsDateString()
   startTime: string;

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Movie } from '../../movies/entities/movie.entity';
 import { Theater } from './theater.entity';
 import { Booking } from '../../bookings/entities/booking.entity';
@@ -8,24 +8,32 @@ export class Showtime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Movie, movie => movie.showtimes)
-  movie: Movie;
-
-  @ManyToOne(() => Theater, theater => theater.showtimes)
-  theater: Theater;
-
-  @Column({ type: 'timestamp' })
+  @Column()
   start_time: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column()
   end_time: Date;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   price: number;
 
   @Column()
   availableSeats: number;
 
-  @OneToMany(() => Booking, booking => booking.showtime)
+  @ManyToOne(() => Movie, (movie) => movie.showtimes)
+  @JoinColumn({ name: 'movieId' })
+  movie: Movie;
+
+  @Column()
+  movieId: number;
+
+  @ManyToOne(() => Theater, (theater) => theater.showtimes)
+  @JoinColumn({ name: 'theaterName' })
+  theater: Theater;
+
+  @Column()
+  theaterName: string;
+
+  @OneToMany(() => Booking, (booking) => booking.showtime)
   bookings: Booking[];
 } 

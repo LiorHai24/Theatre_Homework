@@ -1,6 +1,8 @@
 import { IsNumber, IsString, IsDateString, Min, IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateShowtimeDto } from './create-showtime.dto';
 
-export class UpdateShowtimeDto {
+export class UpdateShowtimeDto extends PartialType(CreateShowtimeDto) {
   @IsOptional()
   @IsNumber()
   movieId?: number;

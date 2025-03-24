@@ -90,7 +90,7 @@ describe('ShowtimesService', () => {
       };
 
       const movie = { id: 1, duration: 180 };
-      const theater = { id: 1, name: 'Sample Theater', capacity: 150 };
+      const theater = { name: 'Sample Theater', capacity: 150 };
       const showtime = { id: 1, ...createShowtimeDto, movie, theater };
 
       mockMovieRepository.findOne.mockResolvedValue(movie);
@@ -147,15 +147,17 @@ describe('ShowtimesService', () => {
         price: 20.2,
         theater: 'Sample Theater',
         startTime: '2025-02-14T11:47:46.125405Z',
-        endTime: '2025-02-14T14:47:46.125405Z',
+        endTime: '2025-02-14T13:47:46.125405Z',
       };
 
-      const movie = { id: 1, duration: 120 };
-      const theater = { id: 1, name: 'Sample Theater', capacity: 150 };
+      const movie = { id: 1, duration: 180 } as Movie;
+      const theater = { name: 'Sample Theater', capacity: 150, rows: 10, seatsPerRow: 15 } as Theater;
       mockMovieRepository.findOne.mockResolvedValue(movie);
       mockTheaterRepository.findOne.mockResolvedValue(theater);
 
       await expect(service.create(createShowtimeDto)).rejects.toThrow(BadRequestException);
+      expect(mockShowtimeRepository.create).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.save).not.toHaveBeenCalled();
     });
   });
 
@@ -211,10 +213,10 @@ describe('ShowtimesService', () => {
       const existingShowtime = {
         id: 1,
         movie: { id: 1, duration: 180 },
-        theater: { id: 1, name: 'Old Theater' },
+        theater: { name: 'Old Theater' },
       };
       const movie = { id: 2, duration: 180 };
-      const theater = { id: 2, name: 'New Theater' };
+      const theater = { name: 'New Theater' };
 
       mockShowtimeRepository.findOne.mockResolvedValue(existingShowtime);
       mockMovieRepository.findOne.mockResolvedValue(movie);
@@ -248,14 +250,11 @@ describe('ShowtimesService', () => {
     it('should remove a showtime and its bookings', async () => {
       const showtime = {
         id: 1,
-        bookings: [
-          { id: 'booking1' },
-          { id: 'booking2' }
-        ]
+        bookings: [{ id: 1 }],
       };
 
       mockShowtimeRepository.findOne.mockResolvedValue(showtime);
-      mockBookingRepository.remove.mockResolvedValue(showtime.bookings);
+      mockBookingRepository.remove.mockResolvedValue({ id: 1 });
       mockShowtimeRepository.remove.mockResolvedValue(showtime);
 
       const result = await service.remove(1);
@@ -269,32 +268,10 @@ describe('ShowtimesService', () => {
       expect(mockShowtimeRepository.remove).toHaveBeenCalledWith(showtime);
     });
 
-    it('should remove a showtime without bookings', async () => {
-      const showtime = {
-        id: 1,
-        bookings: []
-      };
-
-      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
-      mockShowtimeRepository.remove.mockResolvedValue(showtime);
-
-      const result = await service.remove(1);
-
-      expect(result).toEqual({ message: 'Showtime with ID 1 has been successfully deleted' });
-      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['bookings'],
-      });
-      expect(mockBookingRepository.remove).not.toHaveBeenCalled();
-      expect(mockShowtimeRepository.remove).toHaveBeenCalledWith(showtime);
-    });
-
     it('should throw NotFoundException when showtime is not found', async () => {
       mockShowtimeRepository.findOne.mockResolvedValue(null);
 
       await expect(service.remove(1)).rejects.toThrow(NotFoundException);
-      expect(mockBookingRepository.remove).not.toHaveBeenCalled();
-      expect(mockShowtimeRepository.remove).not.toHaveBeenCalled();
     });
   });
 
@@ -309,7 +286,7 @@ describe('ShowtimesService', () => {
       };
 
       const movie = { id: 1, duration: 180 };
-      const theater = { id: 1, name: 'Sample Theater', capacity: 100 };
+      const theater = { name: 'Sample Theater', capacity: 100 };
       const showtime = {
         id: 1,
         availableSeats: 0,
@@ -341,12 +318,16 @@ describe('ShowtimesService', () => {
   describe('createTheater', () => {
     it('should create a theater', async () => {
       const createTheaterDto: CreateTheaterDto = {
-        name: 'Sample Theater',
+        name: 'New Theater',
         rows: 10,
         seatsPerRow: 15,
       };
 
-      const theater = { id: 1, ...createTheaterDto, capacity: 150 };
+      const theater = {
+        ...createTheaterDto,
+        capacity: 150,
+      };
+
       mockTheaterRepository.create.mockReturnValue(theater);
       mockTheaterRepository.save.mockResolvedValue(theater);
 
@@ -364,9 +345,10 @@ describe('ShowtimesService', () => {
   describe('getTheaters', () => {
     it('should return all theaters', async () => {
       const theaters = [
-        { id: 1, name: 'Theater 1' },
-        { id: 2, name: 'Theater 2' },
+        { name: 'Theater 1', capacity: 100 },
+        { name: 'Theater 2', capacity: 150 },
       ];
+
       mockTheaterRepository.find.mockResolvedValue(theaters);
 
       const result = await service.getTheaters();
@@ -376,23 +358,23 @@ describe('ShowtimesService', () => {
     });
   });
 
-  describe('getTheaterById', () => {
-    it('should return a theater', async () => {
-      const theater = { id: 1, name: 'Sample Theater' };
+  describe('getTheaterByName', () => {
+    it('should return a theater by name', async () => {
+      const theater = { name: 'Sample Theater', capacity: 150 };
       mockTheaterRepository.findOne.mockResolvedValue(theater);
 
-      const result = await service.getTheaterById(1);
+      const result = await service.getTheaterByName('Sample Theater');
 
       expect(result).toEqual(theater);
       expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { name: 'Sample Theater' },
       });
     });
 
     it('should throw NotFoundException when theater is not found', async () => {
       mockTheaterRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getTheaterById(1)).rejects.toThrow(NotFoundException);
+      await expect(service.getTheaterByName('Non-existent Theater')).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -11,14 +11,13 @@ describe('ShowtimesController', () => {
 
   const mockShowtimesService = {
     create: jest.fn(),
-    findUpcoming: jest.fn(),
     findByMovie: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
     createTheater: jest.fn(),
     getTheaters: jest.fn(),
-    getTheaterById: jest.fn(),
+    getTheaterByName: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -44,61 +43,63 @@ describe('ShowtimesController', () => {
     it('should create a showtime', async () => {
       const createShowtimeDto: CreateShowtimeDto = {
         movieId: 1,
-        theater: 'Theater 1',
-        startTime: '2024-03-20T18:00:00.000Z',
-        endTime: '2024-03-20T20:16:00.000Z',
-        price: 12.99,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
       };
+
       const expectedResult = { id: 1, ...createShowtimeDto };
       mockShowtimesService.create.mockResolvedValue(expectedResult);
 
       const result = await controller.create(createShowtimeDto);
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.create).toHaveBeenCalledWith(createShowtimeDto);
+      expect(service.create).toHaveBeenCalledWith(createShowtimeDto);
     });
   });
 
-
   describe('findByMovie', () => {
-    it('should return showtimes for a specific movie', async () => {
+    it('should return showtimes for a movie', async () => {
       const expectedResult = [
-        { id: 1, movie: 1, theater: 1 },
-        { id: 2, movie: 1, theater: 2 },
+        { id: 1, movieId: 1 },
+        { id: 2, movieId: 1 },
       ];
       mockShowtimesService.findByMovie.mockResolvedValue(expectedResult);
 
       const result = await controller.findByMovie('1');
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.findByMovie).toHaveBeenCalledWith(1);
+      expect(service.findByMovie).toHaveBeenCalledWith(1);
     });
   });
 
   describe('findOne', () => {
-    it('should return a single showtime', async () => {
-      const expectedResult = { id: 1, movie: 1, theater: 1 };
+    it('should return a showtime', async () => {
+      const expectedResult = { id: 1 };
       mockShowtimesService.findOne.mockResolvedValue(expectedResult);
 
       const result = await controller.findOne('1');
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.findOne).toHaveBeenCalledWith(1);
+      expect(service.findOne).toHaveBeenCalledWith(1);
     });
   });
 
   describe('update', () => {
     it('should update a showtime', async () => {
       const updateShowtimeDto: UpdateShowtimeDto = {
-        price: 14.99,
+        price: 25.2,
+        theater: 'New Theater',
       };
-      const expectedResult = { message: 'Showtime with ID "1" has been successfully updated' };
+
+      const expectedResult = { message: 'Showtime with ID 1 has been successfully updated' };
       mockShowtimesService.update.mockResolvedValue(expectedResult);
 
       const result = await controller.update('1', updateShowtimeDto);
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.update).toHaveBeenCalledWith(1, updateShowtimeDto);
+      expect(service.update).toHaveBeenCalledWith(1, updateShowtimeDto);
     });
   });
 
@@ -110,51 +111,52 @@ describe('ShowtimesController', () => {
       const result = await controller.remove('1');
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.remove).toHaveBeenCalledWith(1);
+      expect(service.remove).toHaveBeenCalledWith(1);
     });
   });
 
   describe('createTheater', () => {
     it('should create a theater', async () => {
       const createTheaterDto: CreateTheaterDto = {
-        name: 'Theater 1',
+        name: 'New Theater',
         rows: 10,
         seatsPerRow: 15,
       };
-      const expectedResult = { id: 1, ...createTheaterDto, capacity: 150 };
+
+      const expectedResult = { ...createTheaterDto, capacity: 150 };
       mockShowtimesService.createTheater.mockResolvedValue(expectedResult);
 
       const result = await controller.createTheater(createTheaterDto);
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.createTheater).toHaveBeenCalledWith(createTheaterDto);
+      expect(service.createTheater).toHaveBeenCalledWith(createTheaterDto);
     });
   });
 
   describe('getTheaters', () => {
     it('should return all theaters', async () => {
       const expectedResult = [
-        { id: 1, rows: 10, seatsPerRow: 15 },
-        { id: 2, rows: 8, seatsPerRow: 12 },
+        { name: 'Theater 1', capacity: 100 },
+        { name: 'Theater 2', capacity: 150 },
       ];
       mockShowtimesService.getTheaters.mockResolvedValue(expectedResult);
 
       const result = await controller.getTheaters();
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.getTheaters).toHaveBeenCalled();
+      expect(service.getTheaters).toHaveBeenCalled();
     });
   });
 
-  describe('getTheaterById', () => {
-    it('should return a single theater', async () => {
-      const expectedResult = { id: 1, rows: 10, seatsPerRow: 15 };
-      mockShowtimesService.getTheaterById.mockResolvedValue(expectedResult);
+  describe('getTheaterByName', () => {
+    it('should return a theater by name', async () => {
+      const expectedResult = { name: 'Sample Theater', capacity: 150 };
+      mockShowtimesService.getTheaterByName.mockResolvedValue(expectedResult);
 
-      const result = await controller.getTheaterById('1');
+      const result = await controller.getTheaterByName('Sample Theater');
 
       expect(result).toEqual(expectedResult);
-      expect(mockShowtimesService.getTheaterById).toHaveBeenCalledWith(1);
+      expect(service.getTheaterByName).toHaveBeenCalledWith('Sample Theater');
     });
   });
 });
