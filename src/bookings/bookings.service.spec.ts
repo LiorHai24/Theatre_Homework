@@ -91,11 +91,13 @@ describe('BookingsService', () => {
           showtime: { id: createBookingDto.showtimeId },
           seatNumber: createBookingDto.seatNumber,
         },
+        relations: ['showtime'],
       });
       expect(mockBookingRepository.create).toHaveBeenCalledWith({
-        ...createBookingDto,
         id: expect.any(String),
-        showtime,
+        seatNumber: createBookingDto.seatNumber,
+        userId: createBookingDto.userId,
+        showtime: showtime
       });
       expect(mockBookingRepository.save).toHaveBeenCalled();
     });

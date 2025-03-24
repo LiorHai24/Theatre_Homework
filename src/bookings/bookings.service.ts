@@ -17,7 +17,6 @@ export class BookingsService {
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<{ bookingId: string }> {
-    console.log('Creating booking with data:', createBookingDto);
   
     // First check if showtime exists
     const showtime = await this.showtimeRepository.findOne({
@@ -27,23 +26,6 @@ export class BookingsService {
   
     if (!showtime) {
       throw new NotFoundException(`Showtime with ID ${createBookingDto.showtimeId} not found`);
-    }
-  
-    // Log the bookings array (if any bookings exist for the showtime)
-    console.log('Bookings for this showtime:', showtime.bookings);
-    
-    // Optionally log details of each booking
-    if (showtime.bookings && showtime.bookings.length > 0) {
-      showtime.bookings.forEach((booking, index) => {
-        console.log(`Booking #${index + 1}:`, {
-          id: booking.id,
-          seatNumber: booking.seatNumber,
-          userId: booking.userId,
-          showtime: booking.showtime?.id,
-        });
-      });
-    } else {
-      console.log('No bookings found for this showtime.');
     }
   
     // Validate userId exists and is valid
@@ -69,16 +51,6 @@ export class BookingsService {
       },
       relations: ['showtime'],
     });
-  
-    console.log('Checking for existing booking:', {
-      showtimeId: createBookingDto.showtimeId,
-      seatNumber: createBookingDto.seatNumber,
-      existingBooking: existingBooking ? {
-        id: existingBooking.id,
-        seatNumber: existingBooking.seatNumber,
-        userId: existingBooking.userId
-      } : null
-    });
 
     if (existingBooking) {
       throw new BadRequestException(`Seat ${createBookingDto.seatNumber} is already booked for this showtime`);
@@ -91,31 +63,14 @@ export class BookingsService {
       userId: createBookingDto.userId,
       showtime: showtime
     });
-  
-    console.log('Created booking object:', {
-      booking
-    });
     
     try {
       const savedBooking = await this.bookingRepository.save(booking);
-      console.log('Successfully saved booking to database:', {
-        id: savedBooking.id,
-        seatNumber: savedBooking.seatNumber,
-        userId: savedBooking.userId,
-        showtime: savedBooking.showtime?.id
-      });
-      const newBooking = await this.bookingRepository.findOne({
-        where: {
-          id: booking.id
-        }
-      });
-      console.log('New booking object:', newBooking);
 
       // Update available seats
       showtime.availableSeats -= 1;
       showtime.bookings.push(savedBooking);
       await this.showtimeRepository.save(showtime);
-      console.log('Updated showtime available seats:', showtime.availableSeats);
     
       return { bookingId: savedBooking.id };
     } catch (error) {
