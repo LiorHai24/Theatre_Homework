@@ -298,6 +298,46 @@ describe('ShowtimesService', () => {
     });
   });
 
+  describe('booking validation', () => {
+    it('should throw BadRequestException when attempting to book a showtime with no available seats', async () => {
+      const createShowtimeDto: CreateShowtimeDto = {
+        movieId: 1,
+        price: 20.2,
+        theater: 'Sample Theater',
+        startTime: '2025-02-14T11:47:46.125405Z',
+        endTime: '2025-02-14T14:47:46.125405Z',
+      };
+
+      const movie = { id: 1, duration: 180 };
+      const theater = { id: 1, name: 'Sample Theater', capacity: 100 };
+      const showtime = {
+        id: 1,
+        availableSeats: 0,
+        theater,
+        movie,
+        bookings: Array(100).fill({}).map((_, index) => ({
+          id: `booking${index + 1}`,
+          seatNumber: index + 1
+        }))
+      };
+
+      mockMovieRepository.findOne.mockResolvedValue(movie);
+      mockTheaterRepository.findOne.mockResolvedValue(theater);
+      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+
+      await expect(service.create(createShowtimeDto)).rejects.toThrow(BadRequestException);
+      expect(mockMovieRepository.findOne).toHaveBeenCalledWith({
+        where: { id: createShowtimeDto.movieId },
+      });
+      expect(mockTheaterRepository.findOne).toHaveBeenCalledWith({
+        where: { name: createShowtimeDto.theater },
+      });
+      expect(mockShowtimeRepository.findOne).toHaveBeenCalled();
+      expect(mockShowtimeRepository.create).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createTheater', () => {
     it('should create a theater', async () => {
       const createTheaterDto: CreateTheaterDto = {

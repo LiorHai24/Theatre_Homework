@@ -72,6 +72,11 @@ export class ShowtimesService {
       );
     }
 
+    // Check if there are any available seats
+    if (theater.capacity <= 0) {
+      throw new BadRequestException('No available seats in this theater');
+    }
+
     const showtime = this.showtimeRepository.create({
       ...createShowtimeDto,
       start_time: startTime,

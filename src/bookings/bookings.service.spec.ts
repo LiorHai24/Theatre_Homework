@@ -12,17 +12,24 @@ describe('BookingsService', () => {
   let bookingRepository: Repository<Booking>;
   let showtimeRepository: Repository<Showtime>;
 
-  const mockBookingRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    findOne: jest.fn(),
-  };
-
   const mockShowtimeRepository = {
     findOne: jest.fn(),
+    save: jest.fn(),
+  };
+
+  const mockBookingRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+  const mockCreateBookingDto = {
+    showtimeId: 1,
+    seatNumber: 1,
+    userId: '123e4567-e89b-12d3-a456-426614174000',
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();  // ✅ Clears previous calls
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BookingsService,
@@ -56,7 +63,9 @@ describe('BookingsService', () => {
 
       const showtime = {
         id: 1,
+        availableSeats: 100,
         theater: { capacity: 100 },
+        bookings: [],
       };
 
       const booking = {
@@ -92,15 +101,12 @@ describe('BookingsService', () => {
     });
 
     it('should throw NotFoundException when showtime is not found', async () => {
-      const createBookingDto: CreateBookingDto = {
-        showtimeId: 1,
-        seatNumber: 1,
-        userId: '123e4567-e89b-12d3-a456-426614174000',
-      };
-
       mockShowtimeRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.create(createBookingDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(mockCreateBookingDto)).rejects.toThrow(NotFoundException);
+  
+      expect(mockBookingRepository.create).not.toHaveBeenCalled();
+      expect(mockBookingRepository.save).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when seat is already booked', async () => {
@@ -113,6 +119,7 @@ describe('BookingsService', () => {
       const showtime = {
         id: 1,
         theater: { capacity: 100 },
+        availableSeats: 100,
       };
 
       const existingBooking = {
@@ -154,12 +161,46 @@ describe('BookingsService', () => {
       const showtime = {
         id: 1,
         theater: { capacity: 100 },
+        availableSeats: 100,
       };
 
       mockShowtimeRepository.findOne.mockResolvedValue(showtime);
       mockBookingRepository.findOne.mockResolvedValue(null);
 
       await expect(service.create(createBookingDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when attempting to book with no available seats', async () => {
+      const createBookingDto: CreateBookingDto = {
+        showtimeId: 2,
+        seatNumber: 1,
+        userId: '123e4567-e89b-12d3-a456-426614174000',
+      };
+
+      const showtime = {
+        id: 2,
+        availableSeats: 0,
+        theater: { capacity: 100 },
+        bookings: Array(100).fill({}).map((_, index) => ({
+          id: `booking${index + 1}`,
+          seatNumber: index + 1,
+          showtime: { id: 2 }
+        }))
+      };
+
+      mockShowtimeRepository.findOne.mockResolvedValue(showtime);
+      mockBookingRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.create(createBookingDto)).rejects.toThrow(BadRequestException);
+      expect(mockShowtimeRepository.findOne).toHaveBeenCalledWith({
+        where: { id: createBookingDto.showtimeId },
+        relations: ['theater', 'bookings'],
+      });
+      expect(mockBookingRepository.findOne).not.toHaveBeenCalled();
+
+      expect(mockBookingRepository.create).not.toHaveBeenCalled();
+      expect(mockBookingRepository.save).not.toHaveBeenCalled();
+      expect(mockShowtimeRepository.save).not.toHaveBeenCalled();
     });
   });
 }); 
