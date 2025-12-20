@@ -1,3 +1,6 @@
+About Me
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems, exited to show you the project i worked on with my bonuses included :)
+
 # Popcorn Palace - Movie Theater Booking System
 
 ## Overview
@@ -99,7 +102,7 @@ Moreover, for updating and deletion, in addition to the status code 200 of succe
 - **Update Showtime**
   - **Endpoint**: `POST /showtimes/update/{id}`
   - **Request Body**: Partial showtime object
-  - **Response**: Success message object
+  - **Response**: Success message objectf
     ```json
     {
       "message": "Showtime with ID 1 has been successfully updated"
