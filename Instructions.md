@@ -278,10 +278,61 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
    - Available seats count is updated when bookings are made
 
 ## Error Handling
-- 400 Bad Request: Invalid input data
-- 404 Not Found: Resource not found
-- 409 Conflict: Resource already exists or conflict with existing data
-- 500 Internal Server Error: Server-side error
+
+The API follows RESTful conventions for error responses. All errors return a JSON object with a consistent structure:
+
+### HTTP Status Codes
+
+- **400 Bad Request**: Invalid input data or validation failures
+  - Example: Invalid seat number, missing required fields, invalid UUID format
+  - Response format:
+  ```json
+  {
+    "statusCode": 400,
+    "message": ["Seat 150 is already booked for this showtime"],
+    "error": "Bad Request"
+  }
+  ```
+
+- **404 Not Found**: Resource not found
+  - Example: Movie, showtime, or booking with specified ID does not exist
+  - Response format:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Showtime with ID 999 not found",
+    "error": "Not Found"
+  }
+  ```
+
+- **409 Conflict**: Resource already exists or conflict with existing data
+  - Example: Duplicate movie title, theater name already in use
+  - Response format:
+  ```json
+  {
+    "statusCode": 409,
+    "message": "A movie with title \"The Matrix\" already exists",
+    "error": "Conflict"
+  }
+  ```
+
+- **500 Internal Server Error**: Unexpected server-side error
+  - Example: Database connection issues, unexpected exceptions
+  - Response format:
+  ```json
+  {
+    "statusCode": 500,
+    "message": "Internal server error",
+    "error": "Internal Server Error"
+  }
+  ```
+
+### Error Response Structure
+
+All error responses follow this consistent format:
+- `statusCode`: HTTP status code number
+- `message`: String or array of strings describing the error
+- `error`: Error type name
 
 ## Testing
 The system includes comprehensive tests for all endpoints and business logic. Tests cover:
@@ -309,8 +360,11 @@ $ npm -v
 # Check Docker version (if using Docker)
 $ docker --version
 $ docker-compose --version
+```
 
 ## Installation
+
+```bash
 # Clone the repository
 $ git clone https://github.com/your-username/your-repo.git
 $ cd your-repo
@@ -323,8 +377,11 @@ $ docker pull postgres:latest
 
 # Start PostgreSQL using docker-compose (as defined in compose.yml)
 $ docker-compose up -d
+```
 
 ## Running the App
+
+```bash
 # Development mode
 $ npm run start
 
@@ -333,9 +390,11 @@ $ npm run start:dev
 
 # Production mode
 $ npm run start:prod
+```
 
 ## Testing
 
+```bash
 # Unit tests
 $ npm run test
 
