@@ -536,6 +536,99 @@ Each feature module follows the same structure:
 - `compose.yml`: Docker Compose configuration for PostgreSQL database
 - `package.json`: Project dependencies and npm scripts
 
+## Usage Examples
+
+This section provides practical examples of common API workflows:
+
+### Complete Booking Workflow
+
+```bash
+# 1. Create a movie
+curl -X POST http://localhost:3000/movies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Inception",
+    "genre": "Sci-Fi",
+    "duration": 148,
+    "rating": 8.8,
+    "release_year": 2010
+  }'
+
+# 2. Create a theater
+curl -X POST http://localhost:3000/showtimes/theater \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Screen 1",
+    "rows": 10,
+    "seatsPerRow": 15
+  }'
+
+# 3. Create a showtime
+curl -X POST http://localhost:3000/showtimes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "movie": 1,
+    "theater": "Screen 1",
+    "start_time": "2024-12-25T19:00:00",
+    "end_time": "2024-12-25T21:28:00",
+    "price": 15.99
+  }'
+
+# 4. Create a booking
+curl -X POST http://localhost:3000/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "showtimeId": 1,
+    "seatNumber": 42,
+    "userId": "550e8400-e29b-41d4-a716-446655440000"
+  }'
+
+# 5. View all movies
+curl http://localhost:3000/movies/all
+
+# 6. Get showtimes for a movie
+curl http://localhost:3000/showtimes/movie/1
+
+# 7. Cancel a booking
+curl -X DELETE http://localhost:3000/bookings/{bookingId}
+```
+
+### Error Handling Examples
+
+```bash
+# Attempting to book an already booked seat
+curl -X POST http://localhost:3000/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "showtimeId": 1,
+    "seatNumber": 42,
+    "userId": "550e8400-e29b-41d4-a716-446655440000"
+  }'
+# Response: 400 Bad Request - "Seat 42 is already booked for this showtime"
+
+# Attempting to create a duplicate movie
+curl -X POST http://localhost:3000/movies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Inception",
+    "genre": "Sci-Fi",
+    "duration": 148,
+    "rating": 8.8,
+    "release_year": 2010
+  }'
+# Response: 409 Conflict - "A movie with title \"Inception\" already exists"
+
+# Accessing non-existent resource
+curl http://localhost:3000/movies/999
+# Response: 404 Not Found - "Movie with ID 999 not found"
+```
+
+### Base URL
+
+All API endpoints are relative to the base URL:
+- **Development**: `http://localhost:3000`
+- **Production**: Configure according to your deployment environment
+
 ## Cleanup
 
 ```bash
