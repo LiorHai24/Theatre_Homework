@@ -156,7 +156,7 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 - **Update Showtime**
   - **Endpoint**: `POST /showtimes/update/{id}`
   - **Request Body**: Partial showtime object
-  - **Response**: Success message objectf
+  - **Response**: Success message object
     ```json
     {
       "message": "Showtime with ID 1 has been successfully updated"
@@ -189,6 +189,16 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 ```json
 {
   "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
+}
+```
+
+#### Delete Booking
+- **Endpoint**: `DELETE /bookings/{id}`
+- **Description**: Cancels and deletes a booking by its UUID
+- **Response**: Success message object
+```json
+{
+  "message": "Booking with ID d1a6423b-4469-4b00-8c5f-e3cfc42eacae has been successfully deleted"
 }
 ```
 
@@ -235,8 +245,9 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
   id: string;          // UUID primary key
   showtime: Showtime;  // Reference to Showtime entity
   seatNumber: number;  // Selected seat number
-  userId: string;      // User identifier
-  bookingTime: Date;   // Time of booking
+  userId: string;      // User identifier (must be valid UUID format)
+  createdAt: Date;     // Timestamp when booking was created
+  updatedAt: Date;     // Timestamp when booking was last updated
 }
 ```
 
@@ -307,13 +318,13 @@ $ cd your-repo
 # Install dependencies
 $ npm install
 
-#import the postgres image to docker
+# Import the postgres image to Docker
 $ docker pull postgres:latest
-# Start PostgreSQL using docker-compose (as defined in compose.yml)
 
+# Start PostgreSQL using docker-compose (as defined in compose.yml)
 $ docker-compose up -d
 
-##Running the app
+## Running the App
 # Development mode
 $ npm run start
 
@@ -323,7 +334,7 @@ $ npm run start:dev
 # Production mode
 $ npm run start:prod
 
-##Test
+## Testing
 
 # Unit tests
 $ npm run test
