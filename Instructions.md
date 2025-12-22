@@ -176,31 +176,37 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 
 #### Create Booking
 - **Endpoint**: `POST /bookings`
-- **Description**: Creates a new booking for a showtime
+- **Description**: Creates a new booking for a showtime. Validates seat availability, seat number range, and user ID format.
 - **Request Body**:
-```json
-{
-  "showtimeId": 1,
-  "seatNumber": 15,
-  "userId": "84438967-f68f-4fa0-b620-0f08217e76af"
-}
-```
-- **Response**: Booking ID
-```json
-{
-  "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
-}
-```
+  ```json
+  {
+    "showtimeId": 1,
+    "seatNumber": 15,
+    "userId": "84438967-f68f-4fa0-b620-0f08217e76af"
+  }
+  ```
+- **Response**: Booking ID object
+  ```json
+  {
+    "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
+  }
+  ```
+- **Validation**:
+  - `showtimeId` must reference an existing showtime
+  - `seatNumber` must be between 1 and theater capacity
+  - `userId` must be a valid UUID format
+  - Seat must not already be booked for the specified showtime
+  - Showtime must have available seats
 
 #### Delete Booking
 - **Endpoint**: `DELETE /bookings/{id}`
-- **Description**: Cancels and deletes a booking by its UUID
+- **Description**: Cancels and deletes a booking by its UUID. Automatically increments available seats count for the associated showtime.
 - **Response**: Success message object
-```json
-{
-  "message": "Booking with ID d1a6423b-4469-4b00-8c5f-e3cfc42eacae has been successfully deleted"
-}
-```
+  ```json
+  {
+    "message": "Booking with ID d1a6423b-4469-4b00-8c5f-e3cfc42eacae has been successfully deleted"
+  }
+  ```
 
 ## Data Models
 
@@ -342,6 +348,32 @@ The system includes comprehensive tests for all endpoints and business logic. Te
 - Edge cases
 - Data integrity
 
+
+## Quick Start
+
+This section provides a quick overview of how to get the application running. For detailed setup instructions, see the Prerequisites and Installation sections below.
+
+**Basic Setup Steps:**
+1. Ensure Node.js and Docker are installed
+2. Clone the repository and install dependencies
+3. Start PostgreSQL using Docker Compose
+4. Run the application in development mode
+5. Access the API at `http://localhost:3000`
+
+**Example Workflow:**
+```bash
+# 1. Start the database
+docker-compose up -d
+
+# 2. Install dependencies
+npm install
+
+# 3. Run the application
+npm run start:dev
+
+# 4. Test the API
+curl http://localhost:3000/movies/all
+```
 
 ## Prerequisites
 
