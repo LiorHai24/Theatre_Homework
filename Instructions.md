@@ -477,6 +477,65 @@ Each test suite includes:
 - Validation tests for business rules
 - Integration tests for entity relationships
 
+## Project Structure
+
+The project follows NestJS conventions with a modular architecture:
+
+```
+popcorn_palace_typescript/
+├── src/
+│   ├── app.module.ts           # Root application module
+│   ├── main.ts                # Application entry point
+│   ├── movies/                # Movies feature module
+│   │   ├── entities/
+│   │   │   └── movie.entity.ts
+│   │   ├── dto/
+│   │   │   ├── create-movie.dto.ts
+│   │   │   └── update-movie.dto.ts
+│   │   ├── movies.controller.ts
+│   │   ├── movies.service.ts
+│   │   └── movies.module.ts
+│   ├── showtimes/             # Showtimes feature module
+│   │   ├── entities/
+│   │   │   ├── showtime.entity.ts
+│   │   │   └── theater.entity.ts
+│   │   ├── dto/
+│   │   │   ├── create-showtime.dto.ts
+│   │   │   ├── update-showtime.dto.ts
+│   │   │   └── create-theater.dto.ts
+│   │   ├── showtimes.controller.ts
+│   │   ├── showtimes.service.ts
+│   │   └── showtimes.module.ts
+│   └── bookings/              # Bookings feature module
+│       ├── entities/
+│       │   └── booking.entity.ts
+│       ├── dto/
+│       │   └── create-booking.dto.ts
+│       ├── bookings.controller.ts
+│       ├── bookings.service.ts
+│       └── bookings.module.ts
+├── test/                      # End-to-end tests
+├── compose.yml                # Docker Compose configuration
+├── package.json               # Dependencies and scripts
+└── Instructions.md            # Project documentation
+```
+
+### Module Organization
+
+Each feature module follows the same structure:
+- **entities/**: TypeORM entity definitions representing database tables
+- **dto/**: Data Transfer Objects for request/response validation
+- **controller.ts**: HTTP endpoint handlers
+- **service.ts**: Business logic implementation
+- **module.ts**: NestJS module configuration
+
+### Key Files
+
+- `src/app.module.ts`: Configures TypeORM connection and imports feature modules
+- `src/main.ts`: Bootstrap function that creates and configures the NestJS application
+- `compose.yml`: Docker Compose configuration for PostgreSQL database
+- `package.json`: Project dependencies and npm scripts
+
 ## Cleanup
 
 ```bash
