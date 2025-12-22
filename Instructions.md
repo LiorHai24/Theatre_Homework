@@ -1,5 +1,6 @@
-About Me
-Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems, exited to show you the project i worked on with my bonuses, now including hooks for ai agent testing once again and again once more and more:)
+## About Me
+
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. I'm excited to share this project I worked on, which includes enhancements and hooks for AI agent testing to facilitate automated testing workflows.
 
 # Popcorn Palace - Movie Theater Booking System
 
