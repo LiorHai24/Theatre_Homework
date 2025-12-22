@@ -50,26 +50,28 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 
 ### Key Features
 
-**Theater Management**
+#### Theater Management
 - Theaters are modeled as first-class objects with configurable capacity, rows, and seats per row
 - Each theater receives a unique identifier upon creation
 - Theater details can be viewed through dedicated API endpoints (see Theater API section below)
 
-**Entity Modeling**
+#### Entity Modeling
 - Movies, theaters, and showtimes are implemented as distinct entities with clear relationships
 - Showtime objects contain all necessary details including movie reference, theater assignment, pricing, and availability
 - Entity relationships ensure data integrity and enable complex queries
 
-**API Response Format**
+#### API Response Format
 - Update and delete operations return both HTTP status code 200 (success) and a descriptive message object
 - This provides clear feedback about the operation result for better API consumer experience
 
 ## API Endpoints
 
 ### Movies
-- **Create Movie**
-  - **Endpoint**: `POST /movies`
-  - **Request Body**:
+
+#### Create Movie
+- **Endpoint**: `POST /movies`
+- **Description**: Creates a new movie entry. Movie titles must be unique.
+- **Request Body**:
     ```json
     {
       "title": "The Matrix",
@@ -79,29 +81,33 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "release_year": 2024
     }
     ```
-  - **Response**: Created movie object
+- **Response**: Created movie object with auto-generated ID
 
-- **Get All Movies**
-  - **Endpoint**: `GET /movies/all`
-  - **Response**: Array of movie objects
+#### Get All Movies
+- **Endpoint**: `GET /movies/all`
+- **Description**: Retrieves all movies in the system.
+- **Response**: Array of movie objects
 
-- **Get Movie by ID**
-  - **Endpoint**: `GET /movies/{id}`
-  - **Response**: Movie object
+#### Get Movie by ID
+- **Endpoint**: `GET /movies/{id}`
+- **Description**: Retrieves a specific movie by its ID, including associated showtimes.
+- **Response**: Movie object with showtimes relation
 
-- **Update Movie**
-  - **Endpoint**: `POST /movies/update/{movieTitle}`
-  - **Request Body**: Partial movie object
-  - **Response**: Success message object
+#### Update Movie
+- **Endpoint**: `POST /movies/update/{movieTitle}`
+- **Description**: Updates an existing movie identified by title. Cannot update title if movie has existing showtimes with mismatched duration.
+- **Request Body**: Partial movie object
+- **Response**: Success message object
     ```json
     {
       "message": "Movie \"The Matrix\" has been successfully updated"
     }
     ```
 
-- **Delete Movie**
-  - **Endpoint**: `DELETE /movies/{movieTitle}`
-  - **Response**: Success message object
+#### Delete Movie
+- **Endpoint**: `DELETE /movies/{movieTitle}`
+- **Description**: Deletes a movie by title. Cannot delete movies with existing showtimes.
+- **Response**: Success message object
     ```json
     {
       "message": "Movie \"The Matrix\" has been successfully deleted"
@@ -109,9 +115,11 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
     ```
 
 ### Theater
-- **Create Theater**
-  - **Endpoint**: `POST /showtimes/theater`
-  - **Request Body**:
+
+#### Create Theater
+- **Endpoint**: `POST /showtimes/theater`
+- **Description**: Creates a new theater with specified capacity, rows, and seats per row. Theater names must be unique.
+- **Request Body**:
     ```json
     {
       "name": "Theater 1",
@@ -120,18 +128,25 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "seatsPerRow": 10
     }
     ```
-  - **Response**: Created theater object
+- **Response**: Created theater object with capacity automatically calculated
+- **Validation**:
+  - Theater name must be unique
+  - Capacity must equal rows × seatsPerRow
+  - All fields are required
 
-- **Get All Theaters**
-  - **Endpoint**: `GET /showtimes/theater/all`
-  - **Response**: Array of theater objects
+#### Get All Theaters
+- **Endpoint**: `GET /showtimes/theater/all`
+- **Description**: Retrieves all theaters in the system.
+- **Response**: Array of theater objects
 
-- **Get Theater by Name**
-  - **Endpoint**: `GET /showtimes/theater/{theaterName}`
-  - **Response**: Theater object
+#### Get Theater by Name
+- **Endpoint**: `GET /showtimes/theater/{theaterName}`
+- **Description**: Retrieves a specific theater by its name (case-sensitive).
+- **Response**: Theater object
 
 ### Showtimes
-- **Create Showtime**
+
+#### Create Showtime
   - **Endpoint**: `POST /showtimes`
   - **Description**: Creates a new showtime for a movie in a specific theater. Validates movie existence, theater availability, duration matching, and prevents overlapping showtimes.
   - **Request Body**:
@@ -153,27 +168,31 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
     - No overlapping showtimes allowed in the same theater
     - `price` must be a positive number
 
-- **Get Showtime by ID**
-  - **Endpoint**: `GET /showtimes/{id}`
-  - **Response**: Showtime object
+#### Get Showtime by ID
+- **Endpoint**: `GET /showtimes/{id}`
+- **Description**: Retrieves a specific showtime by its ID.
+- **Response**: Showtime object
 
-- **Get Showtimes by Movie**
-  - **Endpoint**: `GET /showtimes/movie/{id}`
-  - **Response**: Array of showtime objects
+#### Get Showtimes by Movie
+- **Endpoint**: `GET /showtimes/movie/{id}`
+- **Description**: Retrieves all showtimes for a specific movie.
+- **Response**: Array of showtime objects
 
-- **Update Showtime**
-  - **Endpoint**: `POST /showtimes/update/{id}`
-  - **Request Body**: Partial showtime object
-  - **Response**: Success message object
+#### Update Showtime
+- **Endpoint**: `POST /showtimes/update/{id}`
+- **Description**: Updates an existing showtime. Validates duration and overlap constraints.
+- **Request Body**: Partial showtime object
+- **Response**: Success message object
     ```json
     {
       "message": "Showtime with ID 1 has been successfully updated"
     }
     ```
 
-- **Delete Showtime**
-  - **Endpoint**: `DELETE /showtimes/{id}`
-  - **Response**: Success message object
+#### Delete Showtime
+- **Endpoint**: `DELETE /showtimes/{id}`
+- **Description**: Deletes a showtime by ID. Cannot delete showtimes with existing bookings.
+- **Response**: Success message object
     ```json
     {
       "message": "Showtime with ID 1 has been successfully deleted"
