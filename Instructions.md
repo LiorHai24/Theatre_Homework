@@ -1,8 +1,24 @@
 ## About Me
 
-Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. I'm excited to share this project I worked on, which includes enhancements and hooks for AI agent testing to facilitate automated testing workflows. In addition, added linting descriptor to find my mistakes.
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. I'm excited to share this project I worked on, which includes enhancements and hooks for AI agent testing to facilitate automated testing workflows. In addition, I've added linting descriptors to help identify and correct code quality issues.
 
 # Popcorn Palace - Movie Theater Booking System
+
+## Development Tools & Quality Assurance
+
+### AI Agent Testing Hooks
+This project includes hooks for AI agent testing that enable automated code review and testing workflows. These hooks allow AI agents to:
+- Perform automated code quality checks
+- Validate API endpoints and business logic
+- Run comprehensive test suites
+- Analyze code patterns and suggest improvements
+
+### Linting Configuration
+The project uses ESLint with Prettier for code formatting and quality assurance. The linting configuration helps maintain:
+- Consistent code style across the codebase
+- Early detection of potential bugs and code smells
+- Adherence to TypeScript and NestJS best practices
+- Automated formatting to reduce manual code review overhead
 
 ## Overview
 Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation. The system ensures that showtime durations match their corresponding movie durations and handles theater capacity management.
