@@ -48,9 +48,21 @@ The application follows a modular architecture pattern with clear separation of 
 ## Overview
 Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation. The system ensures that showtime durations match their corresponding movie durations and handles theater capacity management.
 
-I took it to my own personal direction with adding a theater as an object(you can see the api in this file for creation and view of the existing theaters)with number of rows, seats per row, and total capacity, getting a unique id upon creation.
-I believed it would be more realistic to have objects in the code, also implemented movies and showtime, so for a showtime object you can see all the neccessary details.
-Moreover, for updating and deletion, in addition to the status code 200 of success, there is also a matching message.
+### Key Features
+
+**Theater Management**
+- Theaters are modeled as first-class objects with configurable capacity, rows, and seats per row
+- Each theater receives a unique identifier upon creation
+- Theater details can be viewed through dedicated API endpoints (see Theater API section below)
+
+**Entity Modeling**
+- Movies, theaters, and showtimes are implemented as distinct entities with clear relationships
+- Showtime objects contain all necessary details including movie reference, theater assignment, pricing, and availability
+- Entity relationships ensure data integrity and enable complex queries
+
+**API Response Format**
+- Update and delete operations return both HTTP status code 200 (success) and a descriptive message object
+- This provides clear feedback about the operation result for better API consumer experience
 
 ## API Endpoints
 
