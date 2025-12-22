@@ -1,7 +1,49 @@
-About Me
-Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems, exited to show you the project i worked on with my bonuses, now including hooks for ai agent testing once again and again once more:)
+## About Me
+
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. I'm excited to share this project I worked on, which includes enhancements and hooks for AI agent testing to facilitate automated testing workflows. In addition, I've added linting descriptors to help identify and correct code quality issues.
 
 # Popcorn Palace - Movie Theater Booking System
+
+## Development Tools & Quality Assurance
+
+### AI Agent Testing Hooks
+This project includes hooks for AI agent testing that enable automated code review and testing workflows. These hooks allow AI agents to:
+- Perform automated code quality checks
+- Validate API endpoints and business logic
+- Run comprehensive test suites
+- Analyze code patterns and suggest improvements
+
+### Linting Configuration
+The project uses ESLint with Prettier for code formatting and quality assurance. The linting configuration helps maintain:
+- Consistent code style across the codebase
+- Early detection of potential bugs and code smells
+- Adherence to TypeScript and NestJS best practices
+- Automated formatting to reduce manual code review overhead
+
+## Technical Stack
+
+This project is built using modern web technologies and follows industry best practices for scalable backend development:
+
+### Backend Framework
+- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications. NestJS provides a modular architecture, dependency injection, and built-in support for TypeScript.
+
+### Database & ORM
+- **PostgreSQL**: A powerful, open-source relational database system used for persistent data storage. PostgreSQL provides ACID compliance, robust transaction support, and excellent performance for complex queries.
+- **TypeORM**: An Object-Relational Mapping library that bridges TypeScript classes with database tables. TypeORM handles entity relationships, migrations, and provides type-safe database operations.
+
+### Development Tools
+- **TypeScript**: Provides static type checking and enhanced developer experience
+- **Docker**: Containerization for consistent development and deployment environments
+- **Jest**: Testing framework for unit and integration tests
+- **ESLint & Prettier**: Code quality and formatting tools
+
+### Architecture Decisions
+The application follows a modular architecture pattern with clear separation of concerns:
+- **Modules**: Each feature (movies, showtimes, bookings) is organized into its own NestJS module
+- **Entities**: Database models are defined using TypeORM decorators for type safety
+- **Services**: Business logic is encapsulated in service classes with dependency injection
+- **Controllers**: HTTP endpoints are handled by controllers that delegate to services
+- **DTOs**: Data Transfer Objects ensure request/response validation and type safety
 
 ## Overview
 Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation. The system ensures that showtime durations match their corresponding movie durations and handles theater capacity management.
