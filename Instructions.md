@@ -133,6 +133,7 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 ### Showtimes
 - **Create Showtime**
   - **Endpoint**: `POST /showtimes`
+  - **Description**: Creates a new showtime for a movie in a specific theater. Validates movie existence, theater availability, duration matching, and prevents overlapping showtimes.
   - **Request Body**:
     ```json
     {
@@ -143,7 +144,14 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "price": 12.99
     }
     ```
-  - **Response**: Created showtime object
+  - **Response**: Created showtime object with `availableSeats` initialized to theater capacity
+  - **Validation**:
+    - `movie` must reference an existing movie
+    - `theater` must reference an existing theater
+    - `start_time` and `end_time` must be valid ISO 8601 date strings
+    - Duration between `start_time` and `end_time` must match movie duration (within 5-minute tolerance)
+    - No overlapping showtimes allowed in the same theater
+    - `price` must be a positive number
 
 - **Get Showtime by ID**
   - **Endpoint**: `GET /showtimes/{id}`
@@ -340,15 +348,6 @@ All error responses follow this consistent format:
 - `message`: String or array of strings describing the error
 - `error`: Error type name
 
-## Testing
-The system includes comprehensive tests for all endpoints and business logic. Tests cover:
-- Successful operations
-- Error cases
-- Validation rules
-- Edge cases
-- Data integrity
-
-
 ## Quick Start
 
 This section provides a quick overview of how to get the application running. For detailed setup instructions, see the Prerequisites and Installation sections below.
@@ -426,6 +425,15 @@ $ npm run start:prod
 
 ## Testing
 
+The system includes comprehensive tests for all endpoints and business logic. Tests cover:
+- Successful operations
+- Error cases and exception handling
+- Validation rules and constraints
+- Edge cases and boundary conditions
+- Data integrity and relationships
+
+### Running Tests
+
 ```bash
 # Unit tests
 $ npm run test
@@ -435,6 +443,24 @@ $ npm run test:e2e
 
 # Test coverage
 $ npm run test:cov
+```
 
+### Test Structure
+
+Tests are organized by feature module:
+- `movies.service.spec.ts` - Movie service unit tests
+- `showtimes.service.spec.ts` - Showtime service unit tests
+- `bookings.service.spec.ts` - Booking service unit tests
+
+Each test suite includes:
+- Positive test cases for successful operations
+- Negative test cases for error scenarios
+- Validation tests for business rules
+- Integration tests for entity relationships
+
+## Cleanup
+
+```bash
 # Stop the database container
 $ docker-compose down
+```
