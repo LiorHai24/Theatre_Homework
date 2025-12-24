@@ -7,7 +7,7 @@ Hi, I'm Lior, a 27-year-old software developer passionate about building scalabl
 ## Development Tools & Quality Assurance
 
 ### AI Agent Testing Hooks
-This project includes hooks for AI agent testing that enable automated code review and testing workflows. These hooks allow AI agents to:
+Hooks for AI agent testing enable automated code review and testing workflows. These hooks allow AI agents to:
 - Perform automated code quality checks
 - Validate API endpoints and business logic
 - Run comprehensive test suites
@@ -104,7 +104,7 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 #### Get All Movies
 - **Endpoint**: `GET /movies/all`
-- **Description**: Retrieves all movies in the system.
+- **Description**: Retrieves all movies.
 - **Response** (200 OK): Array of movie objects
     ```json
     [
@@ -213,7 +213,7 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 #### Get All Theaters
 - **Endpoint**: `GET /showtimes/theater/all`
-- **Description**: Retrieves all theaters in the system.
+- **Description**: Retrieves all theaters.
 - **Response** (200 OK): Array of theater objects
     ```json
     [
@@ -596,11 +596,13 @@ All error responses follow this consistent format:
 This section provides a quick overview of how to get the application running. For detailed setup instructions, see the Prerequisites and Installation sections below.
 
 **Basic Setup Steps:**
-1. Ensure Node.js and Docker are installed
+1. Ensure Node.js (LTS) and Docker are installed
 2. Clone the repository and install dependencies
 3. Start PostgreSQL using Docker Compose
 4. Run the application in development mode
 5. Access the API at `http://localhost:3000`
+
+> **Note**: Make sure Docker Desktop is running before executing `docker-compose` commands.
 
 **Example Workflow:**
 ```bash
@@ -656,19 +658,42 @@ $ docker-compose up -d
 ## Running the App
 
 ```bash
-# Development mode
+# Development mode (single run)
 $ npm run start
 
-# Watch mode
+# Watch mode (auto-reload on file changes - recommended for development)
 $ npm run start:dev
 
-# Production mode
+# Production mode (compiled JavaScript)
 $ npm run start:prod
 ```
+
+> **Tip**: Use `npm run start:dev` during development for automatic reloading when you make code changes.
 
 ## Testing
 
 The system uses **Jest** as the testing framework with comprehensive test coverage for all endpoints and business logic. The testing strategy follows a multi-layered approach to ensure reliability and correctness.
+
+### Testing Strategy Overview
+
+The testing approach is organized in three layers:
+
+1. **Unit Tests**: Test individual service methods in isolation using mocked dependencies
+   - Focus on business logic validation
+   - Fast execution and high coverage
+   - Located in `*.service.spec.ts` files
+
+2. **Integration Tests**: Test interactions between services and repositories
+   - Verify entity relationships and data flow
+   - Test cross-module interactions
+   - Validate database operations
+
+3. **End-to-End (E2E) Tests**: Test complete API workflows
+   - Full HTTP request/response cycle
+   - Test entire user journeys
+   - Located in `test/` directory
+
+This multi-layered approach ensures that bugs are caught early, tests run quickly during development, and the system behaves correctly at all levels of abstraction.
 
 ### Testing Framework
 
@@ -732,35 +757,201 @@ Each test suite includes:
 ```typescript
 describe('BookingsService', () => {
   it('should create a booking successfully', async () => {
-    // Test successful booking creation
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    mockBookingRepository.findOne.mockResolvedValue(null);
+    const result = await service.create(createBookingDto);
+    
+    // Assert
+    expect(result).toHaveProperty('bookingId');
+    expect(mockBookingRepository.save).toHaveBeenCalled();
   });
 
   it('should throw BadRequestException for duplicate seat booking', async () => {
-    // Test duplicate booking prevention
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    const existingBooking = { id: 'existing-id', seatNumber: 15 };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    mockBookingRepository.findOne.mockResolvedValue(existingBooking);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
   });
 
   it('should throw NotFoundException for invalid showtime', async () => {
-    // Test error handling
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 999,
+      seatNumber: 15,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(null);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(NotFoundException);
+  });
+
+  it('should throw BadRequestException for invalid UUID format', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: 'invalid-uuid-format'
+    };
+    
+    // Act
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should throw BadRequestException for seat number exceeding capacity', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 150,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should throw BadRequestException when no seats are available', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 0, theater: { capacity: 100 } };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
   });
 });
 ```
 
-**Integration Test Example**:
+**Integration Test Example** (End-to-End):
 ```typescript
 describe('Booking Workflow (e2e)', () => {
   it('should complete full booking workflow', async () => {
-    // Create movie -> Create theater -> Create showtime -> Create booking
+    // Create movie
+    const movieResponse = await request(app.getHttpServer())
+      .post('/movies')
+      .send({ title: 'Test Movie', genre: 'Action', duration: 120, rating: 8.0, release_year: 2024 })
+      .expect(201);
+    
+    // Create theater
+    await request(app.getHttpServer())
+      .post('/showtimes/theater')
+      .send({ name: 'Test Theater', rows: 10, seatsPerRow: 10 })
+      .expect(201);
+    
+    // Create showtime
+    const showtimeResponse = await request(app.getHttpServer())
+      .post('/showtimes')
+      .send({
+        movie: movieResponse.body.id,
+        theater: 'Test Theater',
+        start_time: '2024-12-25T19:00:00',
+        end_time: '2024-12-25T21:00:00',
+        price: 15.99
+      })
+      .expect(201);
+    
+    // Create booking
+    const bookingResponse = await request(app.getHttpServer())
+      .post('/bookings')
+      .send({
+        showtimeId: showtimeResponse.body.id,
+        seatNumber: 42,
+        userId: '550e8400-e29b-41d4-a716-446655440000'
+      })
+      .expect(201);
+    
+    expect(bookingResponse.body).toHaveProperty('bookingId');
   });
 });
+```
+
+**Test Coverage Example**:
+After running `npm run test:cov`, you'll see output like:
+```
+-------------------|---------|----------|---------|---------|
+File               | % Stmts | % Branch | % Funcs | % Lines |
+-------------------|---------|----------|---------|---------|
+All files          |   85.2  |   78.5   |   82.1  |   85.0  |
+ bookings/         |   88.5  |   80.0   |   85.7  |   88.3  |
+  bookings.service |   88.5  |   80.0   |   85.7  |   88.3  |
+ movies/           |   83.1  |   77.8   |   80.0  |   83.0  |
+  movies.service   |   83.1  |   77.8   |   80.0  |   83.0  |
+-------------------|---------|----------|---------|---------|
+```
+
+### Test Coverage Metrics
+
+The project maintains high test coverage across all modules:
+
+- **Current Coverage Target**: >80% code coverage
+- **Coverage Report**: Generated automatically with `npm run test:cov`
+- **Coverage Files**: Located in `coverage/` directory after running coverage tests
+- **Coverage Types**:
+  - Statement coverage: Percentage of code statements executed
+  - Branch coverage: Percentage of conditional branches tested
+  - Function coverage: Percentage of functions called
+  - Line coverage: Percentage of code lines executed
+
+**Viewing Coverage Reports**:
+```bash
+# Generate and view coverage report
+$ npm run test:cov
+
+# Open HTML coverage report (after running test:cov)
+# Navigate to coverage/lcov-report/index.html in your browser
 ```
 
 ### Test Best Practices
 
 - **Isolation**: Each test is independent and can run in any order
-- **Mocking**: External dependencies (repositories, services) are mocked
+- **Mocking**: External dependencies (repositories, services) are mocked using `getRepositoryToken`
 - **Assertions**: Clear and descriptive assertions for better failure messages
 - **Coverage**: Aim for >80% code coverage across all modules
 - **Naming**: Descriptive test names that explain what is being tested
+- **AAA Pattern**: Follow Arrange-Act-Assert pattern for test structure
+- **Test Data**: Use factories or builders for creating test data
+- **Cleanup**: Reset mocks between tests using `beforeEach` hooks
 
 ## Project Structure
 
@@ -1084,7 +1275,51 @@ This section outlines recommended practices for working with the Popcorn Palace 
 - Display user-friendly messages based on the `message` field
 - Use the `statusCode` field to determine error type
 
-**Performance Optimization**:
+### Performance Optimization
+
+> **Performance Considerations**: As the application scales, performance becomes critical. The following optimizations are implemented and recommended for production deployments.
+
+**Current Performance Optimizations**:
+
+- **Database Indexing**: Primary keys and foreign keys are automatically indexed by TypeORM
+- **Connection Pooling**: TypeORM manages database connection pooling automatically
+- **Query Optimization**: TypeORM query builders optimize SQL generation
+- **Eager Loading**: Strategic use of relations loading to prevent N+1 queries
+- **Transaction Management**: Efficient use of database transactions for booking operations
+
+**Scaling Considerations**:
+
+- **Horizontal Scaling**: Application can be scaled horizontally behind a load balancer
+- **Database Scaling**: PostgreSQL supports read replicas for read-heavy workloads
+- **Caching Layer**: Redis can be added for session management and frequently accessed data
+- **CDN Integration**: Static assets and API responses can be cached at CDN level
+- **Message Queues**: Background job processing for non-critical operations (email notifications, reports)
+
+### Performance Testing
+
+Before deploying to production, it's recommended to perform performance testing:
+
+**Load Testing**:
+- Use tools like Apache Bench (ab), Artillery, or k6 for load testing
+- Test API endpoints under various load conditions
+- Monitor response times and error rates
+- Example load test command:
+  ```bash
+  # Install k6 (if not installed)
+  # Run load test
+  k6 run load-test.js
+  ```
+
+**Performance Monitoring**:
+- Monitor database query execution times
+- Track API response times using middleware
+- Set up alerts for slow queries (>100ms)
+- Use PostgreSQL's `pg_stat_statements` extension for query analysis
+
+**Performance Benchmarks**:
+- Target response times: <100ms for simple queries, <500ms for complex operations
+- Database connection pool size: Configure based on expected concurrent users
+- Cache hit ratio: Aim for >80% for frequently accessed data
 
 **Caching Strategies**:
 - Implement Redis or in-memory caching for frequently accessed data
@@ -1132,6 +1367,38 @@ This section outlines recommended practices for working with the Popcorn Palace 
 - Confirm showtime has available seats
 
 ### Security Considerations
+
+> **Critical**: Security is paramount when handling user data and API requests. This application implements multiple security layers to protect against common vulnerabilities.
+
+**Security Implementation in Code**:
+
+The application includes the following security measures:
+
+- **Input Validation**: All DTOs use `class-validator` decorators for automatic validation
+  ```typescript
+  // Example from CreateBookingDto
+  @IsUUID()
+  userId: string;
+  
+  @IsInt()
+  @Min(1)
+  seatNumber: number;
+  ```
+
+- **SQL Injection Prevention**: TypeORM uses parameterized queries automatically
+- **Error Handling**: Sensitive information is never exposed in error messages
+- **Type Safety**: TypeScript provides compile-time type checking
+- **UUID Validation**: User IDs are validated for proper UUID format before processing
+
+**Security Best Practices for API Consumers**:
+
+- Always use HTTPS in production environments
+- Never expose API keys or authentication tokens in client-side code
+- Implement proper error handling that doesn't reveal sensitive system information
+- Validate and sanitize all user inputs before sending to the API
+- Use secure storage for user credentials and tokens
+- Implement rate limiting on the client side to prevent accidental abuse
+- Monitor API usage for suspicious patterns
 
 **Authentication & Authorization**:
 - Implement JWT (JSON Web Tokens) or OAuth2 for user authentication
