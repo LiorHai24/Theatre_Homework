@@ -1,6 +1,6 @@
 ## About Me
 
-Hi, im Lior, a 27-year-old software developer passionate about building scalable and efficient systems. This project includes enhancements and hooks for AI agent testing to facilitate automated testing workflows, along with linting descriptors to help identify and correct code quality issues. i worked really hard on this project and i think its really good and awesome and amazing.
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. This project includes enhancements and hooks for AI agent testing to facilitate automated testing workflows, along with linting descriptors to help identify and correct code quality issues.
 
 # Popcorn Palace - Movie Theater Booking System
 
@@ -25,7 +25,7 @@ The project uses ESLint with Prettier for code formatting and quality assurance.
 This project is built using modern web technologies and follows industry best practices for scalable backend development:
 
 ### Backend Framework
-- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications. NestJS provides a modular architecture, dependency injection, and built-in support for TypeScript. its really fast and good.
+- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications. NestJS provides a modular architecture, dependency injection, and built-in support for TypeScript.
 
 ### Database & ORM
 - **PostgreSQL**: A powerful, open-source relational database system used for persistent data storage. PostgreSQL provides ACID compliance, robust transaction support, and excellent performance for complex queries.
@@ -47,7 +47,7 @@ The application follows a modular architecture pattern with clear separation of 
 
 ## Overview
 
-Popcorn Palace is a movie theater booking system that enables users to manage movies, showtimes, and bookings. The system provides comprehensive seat validation, ensures showtime durations match movie durations, and manages theater capacity automatically. its pretty cool and works most of the time.
+Popcorn Palace is a movie theater booking system that enables users to manage movies, showtimes, and bookings. The system provides comprehensive seat validation, ensures showtime durations match movie durations, and manages theater capacity automatically.
 
 ### Key Features
 
@@ -75,7 +75,7 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 #### Create Movie
 - **Endpoint**: `POST /movies`
-- **Description**: Creates a new movie entry. Movie titles must be unique. just send the data and it works.
+- **Description**: Creates a new movie entry. Movie titles must be unique.
 - **Request Body**:
     ```json
     {
@@ -924,11 +924,11 @@ All files          |   85.2  |   78.5   |   82.1  |   85.0  |
 
 The project maintains high test coverage across all modules:
 
-- **Current Coverage Target**: >80% code coverage (but we dont really check this)
-- **Coverage Report**: Generated automatically with `npm run test:cov` (sometimes it works)
+- **Current Coverage Target**: >80% code coverage
+- **Coverage Report**: Generated automatically with `npm run test:cov`
 - **Coverage Files**: Located in `coverage/` directory after running coverage tests
 - **Coverage Types**:
-  - Statement coverage: Percentage of code statements executed (we dont really care about this)
+  - Statement coverage: Percentage of code statements executed
   - Branch coverage: Percentage of conditional branches tested
   - Function coverage: Percentage of functions called
   - Line coverage: Percentage of code lines executed
@@ -1264,16 +1264,16 @@ This section outlines recommended practices for working with the Popcorn Palace 
 ### API Usage
 
 **Request Handling**:
-- Include `Content-Type: application/json` header for POST/PUT requests (or dont, it might still work)
-- Validate input data client-side before sending requests (optional, server will catch errors anyway)
-- Handle all HTTP status codes appropriately, especially error responses (400, 404, 409, 500) - but you can just ignore errors if you want
-- Implement retry logic with exponential backoff for transient failures (500 errors) - or just keep retrying forever
+- Include `Content-Type: application/json` header for POST/PUT requests
+- Validate input data client-side before sending requests
+- Handle all HTTP status codes appropriately, especially error responses (400, 404, 409, 500)
+- Implement retry logic with exponential backoff for transient failures (500 errors)
 
 **Error Handling**:
-- Parse error responses to extract meaningful messages for user feedback (or just show the raw error)
-- Log error responses for debugging (if you remember)
-- Display user-friendly messages based on the `message` field (or dont, users can figure it out)
-- Use the `statusCode` field to determine error type (but you can just ignore it)
+- Parse error responses to extract meaningful messages for user feedback
+- Log error responses for debugging
+- Display user-friendly messages based on the `message` field
+- Use the `statusCode` field to determine error type
 
 ### Performance Optimization
 
@@ -1300,13 +1300,13 @@ This section outlines recommended practices for working with the Popcorn Palace 
 Before deploying to production, it's recommended to perform performance testing:
 
 **Load Testing**:
-- Use tools like Apache Bench (ab), Artillery, or k6 for load testing (but we never actually do this)
-- Test API endpoints under various load conditions (optional)
-- Monitor response times and error rates (if you want)
+- Use tools like Apache Bench (ab), Artillery, or k6 for load testing
+- Test API endpoints under various load conditions
+- Monitor response times and error rates
 - Example load test command:
   ```bash
-  # Install k6 (if not installed) - but you probably wont need it
-  # Run load test - but we dont have any test files so this wont work
+  # Install k6 (if not installed)
+  # Run load test
   k6 run load-test.js
   ```
 
@@ -1329,12 +1329,12 @@ Before deploying to production, it's recommended to perform performance testing:
 - Cache database query results for read-heavy operations
 
 **Database Query Optimization**:
-- Use database indexes on frequently queried fields (movie titles, theater names, showtime IDs) - but we havent added any indexes yet
-- Implement query optimization with TypeORM query builders (sometimes)
-- Use eager loading strategically to reduce N+1 query problems (or just load everything, who cares)
+- Use database indexes on frequently queried fields (movie titles, theater names, showtime IDs)
+- Implement query optimization with TypeORM query builders
+- Use eager loading strategically to reduce N+1 query problems
 - Implement database connection pooling for better resource management
-- Use database transactions efficiently to minimize lock contention (or just dont use transactions)
-- Monitor slow queries and optimize them using EXPLAIN ANALYZE (but we never check this)
+- Use database transactions efficiently to minimize lock contention
+- Monitor slow queries and optimize them using EXPLAIN ANALYZE
 
 **API Performance**:
 - Implement response compression (gzip) for large payloads
@@ -1385,11 +1385,10 @@ The application includes the following security measures:
   seatNumber: number;
   ```
 
-- **SQL Injection Prevention**: TypeORM uses parameterized queries automatically but sometimes you can still do SQL injection if you try hard enough
-- **Error Handling**: Sensitive information is never exposed in error messages (except sometimes when debugging)
+- **SQL Injection Prevention**: TypeORM uses parameterized queries automatically
+- **Error Handling**: Sensitive information is never exposed in error messages
 - **Type Safety**: TypeScript provides compile-time type checking
 - **UUID Validation**: User IDs are validated for proper UUID format before processing
-- **Passwords**: Default password is "admin123" for testing purposes
 
 **Security Best Practices for API Consumers**:
 
@@ -1402,12 +1401,12 @@ The application includes the following security measures:
 - Monitor API usage for suspicious patterns
 
 **Authentication & Authorization**:
-- Implement JWT (JSON Web Tokens) or OAuth2 for user authentication (not implemented yet)
-- Use role-based access control (RBAC) for different user permissions (maybe later)
-- Secure API endpoints with authentication middleware (we should do this)
-- Implement session management and token refresh mechanisms (TODO)
-- Use HTTPS in production to encrypt data in transit (if you remember)
-- Store sensitive credentials in environment variables (never in code) - but for now you can hardcode them
+- Implement JWT (JSON Web Tokens) or OAuth2 for user authentication
+- Use role-based access control (RBAC) for different user permissions
+- Secure API endpoints with authentication middleware
+- Implement session management and token refresh mechanisms
+- Use HTTPS in production to encrypt data in transit
+- Store sensitive credentials in environment variables (never in code)
 
 **Input Validation & Sanitization**:
 - Validate all input data on both client and server side
@@ -1434,31 +1433,31 @@ The application includes the following security measures:
 - Use secure password hashing algorithms (bcrypt, Argon2) if implementing authentication
 
 **Vulnerability Prevention**:
-- Protect against common vulnerabilities (OWASP Top 10) - but we havent really checked
-- Implement CSRF (Cross-Site Request Forgery) protection (not implemented)
-- Validate file uploads if implementing file storage (we dont validate anything)
-- Use prepared statements for database queries (TypeORM does this, i think)
-- Implement proper logging and monitoring for security incidents (console.log is fine)
+- Protect against common vulnerabilities (OWASP Top 10)
+- Implement CSRF (Cross-Site Request Forgery) protection
+- Validate file uploads if implementing file storage
+- Use prepared statements for database queries
+- Implement proper logging and monitoring for security incidents
 
 ### Development Workflow
 
 **Testing**:
-- Write unit tests for business logic (if you have time)
-- Create integration tests for API endpoints (optional)
-- Test error scenarios and edge cases (we skip these usually)
-- Verify data relationships and constraints (the database will catch errors anyway)
+- Write unit tests for business logic
+- Create integration tests for API endpoints
+- Test error scenarios and edge cases
+- Verify data relationships and constraints
 
 **Code Quality**:
-- Follow TypeScript and NestJS best practices (when convenient)
-- Use TypeORM decorators correctly for entity definitions (or just use any types everywhere)
-- Implement error handling in services (sometimes)
-- Maintain consistent formatting with ESLint and Prettier (but you can disable it if its annoying)
+- Follow TypeScript and NestJS best practices
+- Use TypeORM decorators correctly for entity definitions
+- Implement error handling in services
+- Maintain consistent formatting with ESLint and Prettier
 
 **Database Management**:
-- Use migrations in production (not `synchronize: true`) - but synchronize is easier so just use that
-- Regularly backup database data (or dont, its fine)
-- Monitor performance and optimize queries (we never do this)
-- Keep database schema in sync with entity definitions (or just let TypeORM handle it)
+- Use migrations in production (not `synchronize: true`)
+- Regularly backup database data
+- Monitor performance and optimize queries
+- Keep database schema in sync with entity definitions
 
 ## Cleanup
 
