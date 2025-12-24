@@ -913,6 +913,76 @@ This section addresses common issues and their solutions:
 3. Verify showtime availability before attempting to book
 4. Use `GET /showtimes/{id}` to check current available seats
 
+## Best Practices
+
+This section outlines recommended practices for working with the Popcorn Palace API:
+
+### API Usage
+
+**Request Handling**:
+- Always include `Content-Type: application/json` header for POST/PUT requests
+- Validate input data on the client side before sending requests
+- Handle all HTTP status codes appropriately, especially error responses (400, 404, 409, 500)
+- Implement retry logic for transient failures (500 errors) with exponential backoff
+
+**Error Handling**:
+- Parse error responses to extract meaningful messages for user feedback
+- Log error responses for debugging purposes
+- Display user-friendly error messages based on the `message` field in error responses
+- Check the `statusCode` field to determine the type of error
+
+**Performance Optimization**:
+- Cache frequently accessed data (e.g., movie lists, theater information)
+- Use appropriate HTTP methods (GET for retrieval, POST for creation, DELETE for removal)
+- Minimize unnecessary API calls by batching operations when possible
+- Implement pagination for large datasets (if supported in future versions)
+
+### Data Validation
+
+**Before Creating Resources**:
+- Verify movie titles are unique before attempting creation
+- Check theater capacity matches rows × seatsPerRow
+- Validate showtime durations match movie durations (within 5-minute tolerance)
+- Ensure no overlapping showtimes exist in the same theater
+
+**Before Booking**:
+- Validate UUID format for `userId` (must be valid UUID v4)
+- Check seat availability using `GET /showtimes/{id}` before booking
+- Verify seat number is within valid range (1 to theater capacity)
+- Confirm showtime has available seats
+
+### Security Considerations
+
+**User Identification**:
+- Generate and store UUIDs securely on the client side
+- Never expose sensitive user information in API requests
+- Implement proper authentication and authorization in production environments
+
+**Data Integrity**:
+- Always validate responses before processing
+- Handle edge cases (e.g., concurrent bookings, deleted resources)
+- Implement proper transaction handling for critical operations
+
+### Development Workflow
+
+**Testing**:
+- Write unit tests for all business logic
+- Create integration tests for API endpoints
+- Test error scenarios and edge cases
+- Verify data relationships and constraints
+
+**Code Quality**:
+- Follow TypeScript and NestJS best practices
+- Use TypeORM decorators correctly for entity definitions
+- Implement proper error handling in services
+- Maintain consistent code formatting with ESLint and Prettier
+
+**Database Management**:
+- Use migrations in production instead of `synchronize: true`
+- Regularly backup database data
+- Monitor database performance and optimize queries
+- Keep database schema in sync with entity definitions
+
 ## Cleanup
 
 ```bash
