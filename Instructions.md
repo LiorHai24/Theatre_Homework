@@ -674,6 +674,27 @@ $ npm run start:prod
 
 The system uses **Jest** as the testing framework with comprehensive test coverage for all endpoints and business logic. The testing strategy follows a multi-layered approach to ensure reliability and correctness.
 
+### Testing Strategy Overview
+
+The testing approach is organized in three layers:
+
+1. **Unit Tests**: Test individual service methods in isolation using mocked dependencies
+   - Focus on business logic validation
+   - Fast execution and high coverage
+   - Located in `*.service.spec.ts` files
+
+2. **Integration Tests**: Test interactions between services and repositories
+   - Verify entity relationships and data flow
+   - Test cross-module interactions
+   - Validate database operations
+
+3. **End-to-End (E2E) Tests**: Test complete API workflows
+   - Full HTTP request/response cycle
+   - Test entire user journeys
+   - Located in `test/` directory
+
+This multi-layered approach ensures that bugs are caught early, tests run quickly during development, and the system behaves correctly at all levels of abstraction.
+
 ### Testing Framework
 
 - **Jest**: Primary testing framework for unit and integration tests
@@ -761,10 +782,14 @@ describe('BookingsService', () => {
       seatNumber: 15,
       userId: '550e8400-e29b-41d4-a716-446655440000'
     };
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
     const existingBooking = { id: 'existing-id', seatNumber: 15 };
     
-    // Act & Assert
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
     mockBookingRepository.findOne.mockResolvedValue(existingBooking);
+    
+    // Assert
     await expect(service.create(createBookingDto))
       .rejects.toThrow(BadRequestException);
   });
@@ -777,10 +802,63 @@ describe('BookingsService', () => {
       userId: '550e8400-e29b-41d4-a716-446655440000'
     };
     
-    // Act & Assert
+    // Act
     mockShowtimeRepository.findOne.mockResolvedValue(null);
+    
+    // Assert
     await expect(service.create(createBookingDto))
       .rejects.toThrow(NotFoundException);
+  });
+
+  it('should throw BadRequestException for invalid UUID format', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: 'invalid-uuid-format'
+    };
+    
+    // Act
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should throw BadRequestException for seat number exceeding capacity', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 150,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 10, theater: { capacity: 100 } };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should throw BadRequestException when no seats are available', async () => {
+    // Arrange
+    const createBookingDto = {
+      showtimeId: 1,
+      seatNumber: 15,
+      userId: '550e8400-e29b-41d4-a716-446655440000'
+    };
+    const mockShowtime = { id: 1, availableSeats: 0, theater: { capacity: 100 } };
+    
+    // Act
+    mockShowtimeRepository.findOne.mockResolvedValue(mockShowtime);
+    
+    // Assert
+    await expect(service.create(createBookingDto))
+      .rejects.toThrow(BadRequestException);
   });
 });
 ```
@@ -1197,7 +1275,25 @@ This section outlines recommended practices for working with the Popcorn Palace 
 - Display user-friendly messages based on the `message` field
 - Use the `statusCode` field to determine error type
 
-**Performance Optimization**:
+### Performance Optimization
+
+> **Performance Considerations**: As the application scales, performance becomes critical. The following optimizations are implemented and recommended for production deployments.
+
+**Current Performance Optimizations**:
+
+- **Database Indexing**: Primary keys and foreign keys are automatically indexed by TypeORM
+- **Connection Pooling**: TypeORM manages database connection pooling automatically
+- **Query Optimization**: TypeORM query builders optimize SQL generation
+- **Eager Loading**: Strategic use of relations loading to prevent N+1 queries
+- **Transaction Management**: Efficient use of database transactions for booking operations
+
+**Scaling Considerations**:
+
+- **Horizontal Scaling**: Application can be scaled horizontally behind a load balancer
+- **Database Scaling**: PostgreSQL supports read replicas for read-heavy workloads
+- **Caching Layer**: Redis can be added for session management and frequently accessed data
+- **CDN Integration**: Static assets and API responses can be cached at CDN level
+- **Message Queues**: Background job processing for non-critical operations (email notifications, reports)
 
 ### Performance Testing
 
@@ -1272,7 +1368,27 @@ Before deploying to production, it's recommended to perform performance testing:
 
 ### Security Considerations
 
-> **Important**: Security is critical when handling user data and API requests. Follow these practices to ensure your application is secure.
+> **Critical**: Security is paramount when handling user data and API requests. This application implements multiple security layers to protect against common vulnerabilities.
+
+**Security Implementation in Code**:
+
+The application includes the following security measures:
+
+- **Input Validation**: All DTOs use `class-validator` decorators for automatic validation
+  ```typescript
+  // Example from CreateBookingDto
+  @IsUUID()
+  userId: string;
+  
+  @IsInt()
+  @Min(1)
+  seatNumber: number;
+  ```
+
+- **SQL Injection Prevention**: TypeORM uses parameterized queries automatically
+- **Error Handling**: Sensitive information is never exposed in error messages
+- **Type Safety**: TypeScript provides compile-time type checking
+- **UUID Validation**: User IDs are validated for proper UUID format before processing
 
 **Security Best Practices for API Consumers**:
 
