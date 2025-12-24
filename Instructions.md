@@ -1,6 +1,6 @@
 ## About Me
 
-Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. I'm excited to share this project I worked on, which includes enhancements and hooks for AI agent testing to facilitate automated testing workflows. In addition, I've added linting descriptors to help identify and correct code quality issues.
+Hi, I'm Lior, a 27-year-old software developer passionate about building scalable and efficient systems. This project includes enhancements and hooks for AI agent testing to facilitate automated testing workflows, along with linting descriptors to help identify and correct code quality issues.
 
 # Popcorn Palace - Movie Theater Booking System
 
@@ -46,7 +46,8 @@ The application follows a modular architecture pattern with clear separation of 
 - **DTOs**: Data Transfer Objects ensure request/response validation and type safety
 
 ## Overview
-Popcorn Palace is a movie theater booking system that allows users to manage movies, showtimes, and bookings. The system supports creating and managing movies, theaters, showtimes, and handling bookings with seat validation. The system ensures that showtime durations match their corresponding movie durations and handles theater capacity management.
+
+Popcorn Palace is a movie theater booking system that enables users to manage movies, showtimes, and bookings. The system provides comprehensive seat validation, ensures showtime durations match movie durations, and manages theater capacity automatically.
 
 ### Key Features
 
@@ -61,8 +62,8 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 - Entity relationships ensure data integrity and enable complex queries
 
 #### API Response Format
-- Update and delete operations return both HTTP status code 200 (success) and a descriptive message object
-- This provides clear feedback about the operation result for better API consumer experience
+- Update and delete operations return HTTP status code 200 with a descriptive message object
+- All responses follow consistent JSON formatting for improved API consumer experience
 
 ## API Endpoints
 
@@ -797,11 +798,11 @@ curl http://localhost:3000/movies/999
 
 ### Base URL and Versioning
 
-All API endpoints are relative to the base URL:
+**Base URL**:
 - **Development**: `http://localhost:3000`
 - **Production**: Configure according to your deployment environment
 
-**API Versioning**: The current API version is **v1.0**. Future versions will be indicated in the URL path (e.g., `/v2/movies`) to maintain backward compatibility. When breaking changes are introduced, a new version will be released with migration documentation.
+**API Versioning**: The current API version is **v1.0**. Future versions will be indicated in the URL path (e.g., `/v2/movies`) to maintain backward compatibility. Breaking changes will trigger new version releases with migration documentation.
 
 ## Troubleshooting
 
@@ -920,22 +921,22 @@ This section outlines recommended practices for working with the Popcorn Palace 
 ### API Usage
 
 **Request Handling**:
-- Always include `Content-Type: application/json` header for POST/PUT requests
-- Validate input data on the client side before sending requests
+- Include `Content-Type: application/json` header for POST/PUT requests
+- Validate input data client-side before sending requests
 - Handle all HTTP status codes appropriately, especially error responses (400, 404, 409, 500)
-- Implement retry logic for transient failures (500 errors) with exponential backoff
+- Implement retry logic with exponential backoff for transient failures (500 errors)
 
 **Error Handling**:
 - Parse error responses to extract meaningful messages for user feedback
-- Log error responses for debugging purposes
-- Display user-friendly error messages based on the `message` field in error responses
-- Check the `statusCode` field to determine the type of error
+- Log error responses for debugging
+- Display user-friendly messages based on the `message` field
+- Use the `statusCode` field to determine error type
 
 **Performance Optimization**:
-- Cache frequently accessed data (e.g., movie lists, theater information)
+- Cache frequently accessed data (movie lists, theater information)
 - Use appropriate HTTP methods (GET for retrieval, POST for creation, DELETE for removal)
-- Minimize unnecessary API calls by batching operations when possible
-- Implement pagination for large datasets (if supported in future versions)
+- Minimize API calls by batching operations when possible
+- Implement pagination for large datasets (when supported)
 
 ### Data Validation
 
@@ -954,19 +955,19 @@ This section outlines recommended practices for working with the Popcorn Palace 
 ### Security Considerations
 
 **User Identification**:
-- Generate and store UUIDs securely on the client side
+- Generate and store UUIDs securely client-side
 - Never expose sensitive user information in API requests
-- Implement proper authentication and authorization in production environments
+- Implement authentication and authorization in production environments
 
 **Data Integrity**:
-- Always validate responses before processing
-- Handle edge cases (e.g., concurrent bookings, deleted resources)
-- Implement proper transaction handling for critical operations
+- Validate responses before processing
+- Handle edge cases (concurrent bookings, deleted resources)
+- Implement transaction handling for critical operations
 
 ### Development Workflow
 
 **Testing**:
-- Write unit tests for all business logic
+- Write unit tests for business logic
 - Create integration tests for API endpoints
 - Test error scenarios and edge cases
 - Verify data relationships and constraints
@@ -974,13 +975,13 @@ This section outlines recommended practices for working with the Popcorn Palace 
 **Code Quality**:
 - Follow TypeScript and NestJS best practices
 - Use TypeORM decorators correctly for entity definitions
-- Implement proper error handling in services
-- Maintain consistent code formatting with ESLint and Prettier
+- Implement error handling in services
+- Maintain consistent formatting with ESLint and Prettier
 
 **Database Management**:
-- Use migrations in production instead of `synchronize: true`
+- Use migrations in production (not `synchronize: true`)
 - Regularly backup database data
-- Monitor database performance and optimize queries
+- Monitor performance and optimize queries
 - Keep database schema in sync with entity definitions
 
 ## Cleanup
