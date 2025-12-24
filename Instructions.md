@@ -596,11 +596,13 @@ All error responses follow this consistent format:
 This section provides a quick overview of how to get the application running. For detailed setup instructions, see the Prerequisites and Installation sections below.
 
 **Basic Setup Steps:**
-1. Ensure Node.js and Docker are installed
+1. Ensure Node.js (LTS) and Docker are installed
 2. Clone the repository and install dependencies
 3. Start PostgreSQL using Docker Compose
 4. Run the application in development mode
 5. Access the API at `http://localhost:3000`
+
+> **Note**: Make sure Docker Desktop is running before executing `docker-compose` commands.
 
 **Example Workflow:**
 ```bash
