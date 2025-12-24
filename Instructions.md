@@ -66,6 +66,10 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 
 ## API Endpoints
 
+> **API Version**: v1.0  
+> **Base URL**: `http://localhost:3000` (development)  
+> All endpoints return JSON responses. Error responses follow the standard error format documented in the Error Handling section.
+
 ### Movies
 
 #### Create Movie
@@ -81,38 +85,99 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "release_year": 2024
     }
     ```
-- **Response**: Created movie object with auto-generated ID
+- **Response** (200 OK): Created movie object with auto-generated ID
+    ```json
+    {
+      "id": 1,
+      "title": "The Matrix",
+      "genre": "Action",
+      "duration": 120,
+      "rating": 8.5,
+      "release_year": 2024,
+      "showtimes": []
+    }
+    ```
+- **Error Responses**:
+  - `409 Conflict`: Movie with the same title already exists
+  - `400 Bad Request`: Invalid input data or missing required fields
 
 #### Get All Movies
 - **Endpoint**: `GET /movies/all`
 - **Description**: Retrieves all movies in the system.
-- **Response**: Array of movie objects
+- **Response** (200 OK): Array of movie objects
+    ```json
+    [
+      {
+        "id": 1,
+        "title": "The Matrix",
+        "genre": "Action",
+        "duration": 120,
+        "rating": 8.5,
+        "release_year": 2024
+      }
+    ]
+    ```
+- **Error Responses**:
+  - `500 Internal Server Error`: Database connection issues
 
 #### Get Movie by ID
 - **Endpoint**: `GET /movies/{id}`
 - **Description**: Retrieves a specific movie by its ID, including associated showtimes.
-- **Response**: Movie object with showtimes relation
+- **Path Parameters**:
+  - `id` (number): The unique identifier of the movie
+- **Response** (200 OK): Movie object with showtimes relation
+    ```json
+    {
+      "id": 1,
+      "title": "The Matrix",
+      "genre": "Action",
+      "duration": 120,
+      "rating": 8.5,
+      "release_year": 2024,
+      "showtimes": []
+    }
+    ```
+- **Error Responses**:
+  - `404 Not Found`: Movie with the specified ID does not exist
+  - `400 Bad Request`: Invalid ID format
 
 #### Update Movie
 - **Endpoint**: `POST /movies/update/{movieTitle}`
 - **Description**: Updates an existing movie identified by title. Cannot update title if movie has existing showtimes with mismatched duration.
-- **Request Body**: Partial movie object
-- **Response**: Success message object
+- **Path Parameters**:
+  - `movieTitle` (string): The title of the movie to update
+- **Request Body**: Partial movie object (all fields optional)
+    ```json
+    {
+      "genre": "Sci-Fi",
+      "rating": 9.0
+    }
+    ```
+- **Response** (200 OK): Success message object
     ```json
     {
       "message": "Movie \"The Matrix\" has been successfully updated"
     }
     ```
+- **Error Responses**:
+  - `404 Not Found`: Movie with the specified title does not exist
+  - `409 Conflict`: New title conflicts with an existing movie
+  - `400 Bad Request`: Invalid input data or duration mismatch with existing showtimes
 
 #### Delete Movie
 - **Endpoint**: `DELETE /movies/{movieTitle}`
 - **Description**: Deletes a movie by title. Cannot delete movies with existing showtimes.
-- **Response**: Success message object
+- **Path Parameters**:
+  - `movieTitle` (string): The title of the movie to delete
+- **Response** (200 OK): Success message object
     ```json
     {
       "message": "Movie \"The Matrix\" has been successfully deleted"
     }
     ```
+- **Error Responses**:
+  - `404 Not Found`: Movie with the specified title does not exist
+  - `400 Bad Request`: Movie cannot be deleted because it has existing showtimes
 
 ### Theater
 
@@ -128,28 +193,63 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "seatsPerRow": 10
     }
     ```
-- **Response**: Created theater object with capacity automatically calculated
+- **Response** (200 OK): Created theater object with capacity automatically calculated
+    ```json
+    {
+      "name": "Theater 1",
+      "capacity": 100,
+      "rows": 10,
+      "seatsPerRow": 10
+    }
+    ```
 - **Validation**:
   - Theater name must be unique
   - Capacity must equal rows × seatsPerRow
   - All fields are required
+- **Error Responses**:
+  - `409 Conflict`: Theater with the same name already exists
+  - `400 Bad Request`: Invalid input data, missing required fields, or capacity mismatch
 
 #### Get All Theaters
 - **Endpoint**: `GET /showtimes/theater/all`
 - **Description**: Retrieves all theaters in the system.
-- **Response**: Array of theater objects
+- **Response** (200 OK): Array of theater objects
+    ```json
+    [
+      {
+        "name": "Theater 1",
+        "capacity": 100,
+        "rows": 10,
+        "seatsPerRow": 10
+      }
+    ]
+    ```
+- **Error Responses**:
+  - `500 Internal Server Error`: Database connection issues
 
 #### Get Theater by Name
 - **Endpoint**: `GET /showtimes/theater/{theaterName}`
 - **Description**: Retrieves a specific theater by its name (case-sensitive).
-- **Response**: Theater object
+- **Path Parameters**:
+  - `theaterName` (string): The name of the theater (case-sensitive)
+- **Response** (200 OK): Theater object
+    ```json
+    {
+      "name": "Theater 1",
+      "capacity": 100,
+      "rows": 10,
+      "seatsPerRow": 10
+    }
+    ```
+- **Error Responses**:
+  - `404 Not Found`: Theater with the specified name does not exist
 
 ### Showtimes
 
 #### Create Showtime
-  - **Endpoint**: `POST /showtimes`
-  - **Description**: Creates a new showtime for a movie in a specific theater. Validates movie existence, theater availability, duration matching, and prevents overlapping showtimes.
-  - **Request Body**:
+- **Endpoint**: `POST /showtimes`
+- **Description**: Creates a new showtime for a movie in a specific theater. Validates movie existence, theater availability, duration matching, and prevents overlapping showtimes.
+- **Request Body**:
     ```json
     {
       "movie": 1,
@@ -159,45 +259,109 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
       "price": 12.99
     }
     ```
-  - **Response**: Created showtime object with `availableSeats` initialized to theater capacity
-  - **Validation**:
-    - `movie` must reference an existing movie
-    - `theater` must reference an existing theater
-    - `start_time` and `end_time` must be valid ISO 8601 date strings
-    - Duration between `start_time` and `end_time` must match movie duration (within 5-minute tolerance)
-    - No overlapping showtimes allowed in the same theater
-    - `price` must be a positive number
+- **Response** (200 OK): Created showtime object with `availableSeats` initialized to theater capacity
+    ```json
+    {
+      "id": 1,
+      "movie": { "id": 1, "title": "The Matrix" },
+      "theater": { "name": "Theater 1", "capacity": 100 },
+      "start_time": "2024-03-20T14:00:00",
+      "end_time": "2024-03-20T16:00:00",
+      "price": 12.99,
+      "availableSeats": 100
+    }
+    ```
+- **Validation**:
+  - `movie` must reference an existing movie
+  - `theater` must reference an existing theater
+  - `start_time` and `end_time` must be valid ISO 8601 date strings
+  - Duration between `start_time` and `end_time` must match movie duration (within 5-minute tolerance)
+  - No overlapping showtimes allowed in the same theater
+  - `price` must be a positive number
+- **Error Responses**:
+  - `404 Not Found`: Movie or theater does not exist
+  - `400 Bad Request`: Invalid input data, duration mismatch, overlapping showtime, or invalid price
 
 #### Get Showtime by ID
 - **Endpoint**: `GET /showtimes/{id}`
 - **Description**: Retrieves a specific showtime by its ID.
-- **Response**: Showtime object
+- **Path Parameters**:
+  - `id` (number): The unique identifier of the showtime
+- **Response** (200 OK): Showtime object
+    ```json
+    {
+      "id": 1,
+      "movie": { "id": 1, "title": "The Matrix" },
+      "theater": { "name": "Theater 1", "capacity": 100 },
+      "start_time": "2024-03-20T14:00:00",
+      "end_time": "2024-03-20T16:00:00",
+      "price": 12.99,
+      "availableSeats": 95
+    }
+    ```
+- **Error Responses**:
+  - `404 Not Found`: Showtime with the specified ID does not exist
+  - `400 Bad Request`: Invalid ID format
 
 #### Get Showtimes by Movie
 - **Endpoint**: `GET /showtimes/movie/{id}`
 - **Description**: Retrieves all showtimes for a specific movie.
-- **Response**: Array of showtime objects
+- **Path Parameters**:
+  - `id` (number): The unique identifier of the movie
+- **Response** (200 OK): Array of showtime objects
+    ```json
+    [
+      {
+        "id": 1,
+        "start_time": "2024-03-20T14:00:00",
+        "end_time": "2024-03-20T16:00:00",
+        "price": 12.99,
+        "availableSeats": 95,
+        "theater": { "name": "Theater 1" }
+      }
+    ]
+    ```
+- **Error Responses**:
+  - `404 Not Found`: Movie with the specified ID does not exist
+  - `400 Bad Request`: Invalid ID format
 
 #### Update Showtime
 - **Endpoint**: `POST /showtimes/update/{id}`
 - **Description**: Updates an existing showtime. Validates duration and overlap constraints.
-- **Request Body**: Partial showtime object
-- **Response**: Success message object
+- **Path Parameters**:
+  - `id` (number): The unique identifier of the showtime to update
+- **Request Body**: Partial showtime object (all fields optional)
+    ```json
+    {
+      "price": 14.99,
+      "start_time": "2024-03-20T15:00:00"
+    }
+    ```
+- **Response** (200 OK): Success message object
     ```json
     {
       "message": "Showtime with ID 1 has been successfully updated"
     }
     ```
+- **Error Responses**:
+  - `404 Not Found`: Showtime with the specified ID does not exist
+  - `400 Bad Request`: Invalid input data, duration mismatch, or overlapping showtime
 
 #### Delete Showtime
 - **Endpoint**: `DELETE /showtimes/{id}`
 - **Description**: Deletes a showtime by ID. Cannot delete showtimes with existing bookings.
-- **Response**: Success message object
+- **Path Parameters**:
+  - `id` (number): The unique identifier of the showtime to delete
+- **Response** (200 OK): Success message object
     ```json
     {
       "message": "Showtime with ID 1 has been successfully deleted"
     }
     ```
+- **Error Responses**:
+  - `404 Not Found`: Showtime with the specified ID does not exist
+  - `400 Bad Request`: Showtime cannot be deleted because it has existing bookings
+  - `400 Bad Request`: Invalid ID format
 
 ### Bookings
 
@@ -205,35 +369,43 @@ Popcorn Palace is a movie theater booking system that allows users to manage mov
 - **Endpoint**: `POST /bookings`
 - **Description**: Creates a new booking for a showtime. Validates seat availability, seat number range, and user ID format.
 - **Request Body**:
-  ```json
-  {
-    "showtimeId": 1,
-    "seatNumber": 15,
-    "userId": "84438967-f68f-4fa0-b620-0f08217e76af"
-  }
-  ```
-- **Response**: Booking ID object
-  ```json
-  {
-    "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
-  }
-  ```
+    ```json
+    {
+      "showtimeId": 1,
+      "seatNumber": 15,
+      "userId": "84438967-f68f-4fa0-b620-0f08217e76af"
+    }
+    ```
+- **Response** (200 OK): Booking ID object
+    ```json
+    {
+      "bookingId": "d1a6423b-4469-4b00-8c5f-e3cfc42eacae"
+    }
+    ```
 - **Validation**:
   - `showtimeId` must reference an existing showtime
   - `seatNumber` must be between 1 and theater capacity
   - `userId` must be a valid UUID format
   - Seat must not already be booked for the specified showtime
   - Showtime must have available seats
+- **Error Responses**:
+  - `404 Not Found`: Showtime with the specified ID does not exist
+  - `400 Bad Request`: Invalid seat number, invalid UUID format, seat already booked, or no available seats
 
 #### Delete Booking
 - **Endpoint**: `DELETE /bookings/{id}`
 - **Description**: Cancels and deletes a booking by its UUID. Automatically increments available seats count for the associated showtime.
-- **Response**: Success message object
-  ```json
-  {
-    "message": "Booking with ID d1a6423b-4469-4b00-8c5f-e3cfc42eacae has been successfully deleted"
-  }
-  ```
+- **Path Parameters**:
+  - `id` (string): The UUID of the booking to delete
+- **Response** (200 OK): Success message object
+    ```json
+    {
+      "message": "Booking with ID d1a6423b-4469-4b00-8c5f-e3cfc42eacae has been successfully deleted"
+    }
+    ```
+- **Error Responses**:
+  - `404 Not Found`: Booking with the specified ID does not exist
+  - `400 Bad Request`: Invalid UUID format
 
 ## Data Models
 
@@ -623,11 +795,13 @@ curl http://localhost:3000/movies/999
 # Response: 404 Not Found - "Movie with ID 999 not found"
 ```
 
-### Base URL
+### Base URL and Versioning
 
 All API endpoints are relative to the base URL:
 - **Development**: `http://localhost:3000`
 - **Production**: Configure according to your deployment environment
+
+**API Versioning**: The current API version is **v1.0**. Future versions will be indicated in the URL path (e.g., `/v2/movies`) to maintain backward compatibility. When breaking changes are introduced, a new version will be released with migration documentation.
 
 ## Troubleshooting
 
