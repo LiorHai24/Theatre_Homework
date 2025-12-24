@@ -459,86 +459,137 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 ## Validation Rules
 
-1. Showtime Duration:
-   - The duration between start_time and end_time must match the movie's duration
-   - A 5-minute tolerance is allowed for small discrepancies
-   - If the duration doesn't match, a BadRequestException is thrown
+**1. Showtime Duration Validation**:
+   - The duration between `start_time` and `end_time` must match the movie's duration
+   - A 5-minute tolerance is allowed for small discrepancies (e.g., cleanup time)
+   - Calculation: `(end_time - start_time) in minutes ≈ movie.duration ± 5 minutes`
+   - If the duration doesn't match, a `BadRequestException` (400) is thrown
+   - **Example**: Movie duration 120 minutes, showtime must be 115-125 minutes
 
-2. Theater Capacity:
-   - Theater capacity is automatically calculated as rows * seatsPerRow
+**2. Theater Capacity Management**:
+   - Theater capacity is automatically calculated as `rows × seatsPerRow`
+   - Capacity must match the provided value in create theater request
    - Showtimes cannot be created if the theater has no available seats
-   - Available seats are tracked per showtime
+   - Available seats are tracked per showtime and decremented on booking
+   - Available seats are incremented when bookings are cancelled
 
-3. Theater Names:
-   - Theater names must be unique
-   - Theater names are used as primary keys
-   - Theater names are case-sensitive
+**3. Theater Name Constraints**:
+   - Theater names must be unique across the system
+   - Theater names are used as primary keys (case-sensitive)
+   - Duplicate theater names result in `ConflictException` (409)
+   - **Example**: "Theater 1" and "theater 1" are considered different
 
-4. Showtime Overlap:
+**4. Showtime Overlap Prevention**:
    - No overlapping showtimes are allowed in the same theater
-   - A BadRequestException is thrown if there's an overlap
+   - Overlap detection: `start_time < existing.end_time AND end_time > existing.start_time`
+   - A `BadRequestException` (400) is thrown if there's an overlap
+   - Overlap check is performed before creating or updating showtimes
 
-5. Seat Validation:
-   - Seat numbers must be valid for the theater's capacity
+**5. Seat Booking Validation**:
+   - Seat numbers must be between 1 and theater capacity (inclusive)
    - No duplicate bookings for the same seat in a showtime
-   - Available seats count is updated when bookings are made
+   - Available seats count is automatically updated when bookings are made/cancelled
+   - Seat validation occurs before database transaction to prevent race conditions
+   - Invalid seat numbers result in `BadRequestException` (400)
 
 ## Error Handling
 
-The API follows RESTful conventions for error responses. All errors return a JSON object with a consistent structure:
+The API follows RESTful conventions for error responses. All errors return a JSON object with a consistent structure, making it easy for clients to handle errors programmatically.
 
 ### HTTP Status Codes
 
-- **400 Bad Request**: Invalid input data or validation failures
-  - Example: Invalid seat number, missing required fields, invalid UUID format
-  - Response format:
+**400 Bad Request** - Invalid input data or validation failures:
+- **Common Scenarios**:
+  - Invalid seat number (out of range)
+  - Missing required fields in request body
+  - Invalid UUID format for userId
+  - Invalid date format for showtime times
+  - Duration mismatch between showtime and movie
+  - Overlapping showtimes in the same theater
+- **Response Format**:
   ```json
   {
     "statusCode": 400,
     "message": ["Seat 150 is already booked for this showtime"],
-    "error": "Bad Request"
+    "error": "Bad Request",
+    "timestamp": "2024-03-20T14:30:00.000Z"
   }
   ```
+- **Client Handling**: Validate input data before sending requests. Parse the `message` array to display specific validation errors to users.
 
-- **404 Not Found**: Resource not found
-  - Example: Movie, showtime, or booking with specified ID does not exist
-  - Response format:
+**404 Not Found** - Resource not found:
+- **Common Scenarios**:
+  - Movie, showtime, or booking with specified ID does not exist
+  - Theater with specified name does not exist
+  - Invalid resource identifier format
+- **Response Format**:
   ```json
   {
     "statusCode": 404,
     "message": "Showtime with ID 999 not found",
-    "error": "Not Found"
+    "error": "Not Found",
+    "timestamp": "2024-03-20T14:30:00.000Z"
   }
   ```
+- **Client Handling**: Verify resource existence before operations. Display user-friendly "not found" messages.
 
-- **409 Conflict**: Resource already exists or conflict with existing data
-  - Example: Duplicate movie title, theater name already in use
-  - Response format:
+**409 Conflict** - Resource already exists or conflict with existing data:
+- **Common Scenarios**:
+  - Duplicate movie title
+  - Theater name already in use
+  - Attempting to create conflicting resources
+- **Response Format**:
   ```json
   {
     "statusCode": 409,
     "message": "A movie with title \"The Matrix\" already exists",
-    "error": "Conflict"
+    "error": "Conflict",
+    "timestamp": "2024-03-20T14:30:00.000Z"
   }
   ```
+- **Client Handling**: Check for existing resources before creation. Provide options to update existing resources.
 
-- **500 Internal Server Error**: Unexpected server-side error
-  - Example: Database connection issues, unexpected exceptions
-  - Response format:
+**500 Internal Server Error** - Unexpected server-side error:
+- **Common Scenarios**:
+  - Database connection failures
+  - Unexpected exceptions in business logic
+  - External service failures
+  - Configuration errors
+- **Response Format**:
   ```json
   {
     "statusCode": 500,
     "message": "Internal server error",
-    "error": "Internal Server Error"
+    "error": "Internal Server Error",
+    "timestamp": "2024-03-20T14:30:00.000Z"
   }
   ```
+- **Client Handling**: Implement retry logic with exponential backoff. Log errors for debugging. Notify users of temporary service issues.
 
 ### Error Response Structure
 
 All error responses follow this consistent format:
-- `statusCode`: HTTP status code number
-- `message`: String or array of strings describing the error
-- `error`: Error type name
+- **`statusCode`** (number): HTTP status code (400, 404, 409, 500)
+- **`message`** (string | string[]): Human-readable error description(s)
+- **`error`** (string): Error type name matching HTTP status text
+- **`timestamp`** (string, optional): ISO 8601 timestamp of when the error occurred
+
+### Error Handling Best Practices
+
+**Client-Side**:
+- Always check the `statusCode` field to determine error type
+- Parse `message` array to extract specific validation errors
+- Implement user-friendly error messages based on error type
+- Log errors with full response for debugging
+- Implement retry logic for 500 errors (with exponential backoff)
+- Handle network errors separately from API errors
+
+**Server-Side**:
+- Use appropriate exception types (BadRequestException, NotFoundException, ConflictException)
+- Provide detailed error messages for validation failures
+- Never expose sensitive information in error messages
+- Log errors with full context for debugging
+- Use global exception filters for consistent error formatting
 
 ## Quick Start
 
@@ -617,38 +668,99 @@ $ npm run start:prod
 
 ## Testing
 
-The system includes comprehensive tests for all endpoints and business logic. Tests cover:
-- Successful operations
-- Error cases and exception handling
-- Validation rules and constraints
-- Edge cases and boundary conditions
-- Data integrity and relationships
+The system uses **Jest** as the testing framework with comprehensive test coverage for all endpoints and business logic. The testing strategy follows a multi-layered approach to ensure reliability and correctness.
+
+### Testing Framework
+
+- **Jest**: Primary testing framework for unit and integration tests
+- **Supertest**: HTTP assertion library for API endpoint testing
+- **TypeORM Testing**: Mock repositories for isolated unit testing
+- **Coverage Tools**: Built-in Jest coverage reporting
+
+### Test Coverage
+
+Tests cover the following areas:
+- **Successful Operations**: All CRUD operations for movies, theaters, showtimes, and bookings
+- **Error Handling**: Exception scenarios and error responses (400, 404, 409, 500)
+- **Validation Rules**: Business logic validation and constraint enforcement
+- **Edge Cases**: Boundary conditions, concurrent operations, and race conditions
+- **Data Integrity**: Entity relationships, foreign key constraints, and cascading operations
+- **Integration**: End-to-end workflows and cross-module interactions
 
 ### Running Tests
 
 ```bash
-# Unit tests
+# Run all unit tests
 $ npm run test
 
-# e2e tests
+# Run tests in watch mode (for development)
+$ npm run test:watch
+
+# Run end-to-end tests
 $ npm run test:e2e
 
-# Test coverage
+# Generate test coverage report
 $ npm run test:cov
+
+# Run tests with verbose output
+$ npm run test -- --verbose
+
+# Run specific test file
+$ npm run test -- movies.service.spec.ts
 ```
 
 ### Test Structure
 
-Tests are organized by feature module:
-- `movies.service.spec.ts` - Movie service unit tests
-- `showtimes.service.spec.ts` - Showtime service unit tests
-- `bookings.service.spec.ts` - Booking service unit tests
+Tests are organized by feature module following NestJS testing conventions:
 
+**Unit Tests** (`*.service.spec.ts`):
+- `movies.service.spec.ts` - Movie service business logic tests
+- `showtimes.service.spec.ts` - Showtime service business logic tests
+- `bookings.service.spec.ts` - Booking service business logic tests
+
+**Test Suite Organization**:
 Each test suite includes:
-- Positive test cases for successful operations
-- Negative test cases for error scenarios
-- Validation tests for business rules
-- Integration tests for entity relationships
+- **Positive Test Cases**: Successful CRUD operations, valid data scenarios
+- **Negative Test Cases**: Error scenarios, invalid input handling
+- **Validation Tests**: Business rule enforcement, constraint validation
+- **Integration Tests**: Entity relationships, cross-module interactions
+- **Mock Setup**: Repository mocking, dependency injection testing
+
+### Example Test Cases
+
+**Unit Test Example** (Booking Service):
+```typescript
+describe('BookingsService', () => {
+  it('should create a booking successfully', async () => {
+    // Test successful booking creation
+  });
+
+  it('should throw BadRequestException for duplicate seat booking', async () => {
+    // Test duplicate booking prevention
+  });
+
+  it('should throw NotFoundException for invalid showtime', async () => {
+    // Test error handling
+  });
+});
+```
+
+**Integration Test Example**:
+```typescript
+describe('Booking Workflow (e2e)', () => {
+  it('should complete full booking workflow', async () => {
+    // Create movie -> Create theater -> Create showtime -> Create booking
+  });
+});
+```
+
+### Test Best Practices
+
+- **Isolation**: Each test is independent and can run in any order
+- **Mocking**: External dependencies (repositories, services) are mocked
+- **Assertions**: Clear and descriptive assertions for better failure messages
+- **Coverage**: Aim for >80% code coverage across all modules
+- **Naming**: Descriptive test names that explain what is being tested
 
 ## Project Structure
 
@@ -907,12 +1019,52 @@ This section addresses common issues and their solutions:
 - Seat number exceeds theater capacity
 - Showtime has no available seats
 - Seat is already booked for the specified showtime
+- Showtime ID does not exist
+- Concurrent booking attempts for the same seat
 
 **Solutions**:
-1. Validate UUID format before sending requests
-2. Check theater capacity before selecting seat numbers
-3. Verify showtime availability before attempting to book
-4. Use `GET /showtimes/{id}` to check current available seats
+1. **Validate UUID Format**: Use a UUID validation library before sending requests
+   ```typescript
+   import { validate as isUuid } from 'uuid';
+   if (!isUuid(userId)) {
+     throw new Error('Invalid UUID format');
+   }
+   ```
+
+2. **Check Theater Capacity**: Retrieve showtime details first to verify capacity
+   ```bash
+   GET /showtimes/{id}
+   # Check the theater.capacity field before selecting seat number
+   ```
+
+3. **Verify Availability**: Check available seats before booking
+   ```bash
+   GET /showtimes/{id}
+   # Verify availableSeats > 0
+   ```
+
+4. **Handle Concurrent Bookings**: Implement retry logic for race conditions
+   - If booking fails due to seat already taken, fetch updated showtime and retry
+   - Use optimistic locking or database transactions to prevent double bookings
+
+5. **Error Recovery**: Implement proper error handling
+   - Parse error response to extract specific validation message
+   - Display user-friendly error messages
+   - Provide alternative seat selection options
+
+### Common Error Scenarios
+
+**Database Connection Timeout**:
+- **Problem**: Application cannot connect to PostgreSQL
+- **Solution**: Check Docker container status, verify network connectivity, check firewall rules
+
+**TypeORM Query Errors**:
+- **Problem**: Database queries fail or return unexpected results
+- **Solution**: Verify entity relationships, check query syntax, review database logs
+
+**Validation Pipe Errors**:
+- **Problem**: DTO validation fails with unclear messages
+- **Solution**: Review DTO decorators, check class-validator configuration, verify request body format
 
 ## Best Practices
 
@@ -933,10 +1085,37 @@ This section outlines recommended practices for working with the Popcorn Palace 
 - Use the `statusCode` field to determine error type
 
 **Performance Optimization**:
-- Cache frequently accessed data (movie lists, theater information)
-- Use appropriate HTTP methods (GET for retrieval, POST for creation, DELETE for removal)
+
+**Caching Strategies**:
+- Implement Redis or in-memory caching for frequently accessed data
+- Cache movie lists, theater information, and showtime data
+- Use cache invalidation strategies to maintain data consistency
+- Implement HTTP caching headers (ETag, Last-Modified) for GET requests
+- Cache database query results for read-heavy operations
+
+**Database Query Optimization**:
+- Use database indexes on frequently queried fields (movie titles, theater names, showtime IDs)
+- Implement query optimization with TypeORM query builders
+- Use eager loading strategically to reduce N+1 query problems
+- Implement database connection pooling for better resource management
+- Use database transactions efficiently to minimize lock contention
+- Monitor slow queries and optimize them using EXPLAIN ANALYZE
+
+**API Performance**:
+- Implement response compression (gzip) for large payloads
+- Use pagination for large result sets to reduce response size
 - Minimize API calls by batching operations when possible
-- Implement pagination for large datasets (when supported)
+- Implement request/response caching at the API gateway level
+- Use appropriate HTTP methods (GET for retrieval, POST for creation, DELETE for removal)
+- Implement async processing for long-running operations
+
+**Application-Level Optimization**:
+- Use connection pooling for database connections
+- Implement lazy loading for entity relationships where appropriate
+- Optimize TypeORM entity relationships to reduce unnecessary queries
+- Use database views for complex queries
+- Implement background jobs for non-critical operations
+- Monitor application performance with APM (Application Performance Monitoring) tools
 
 ### Data Validation
 
@@ -954,15 +1133,44 @@ This section outlines recommended practices for working with the Popcorn Palace 
 
 ### Security Considerations
 
-**User Identification**:
-- Generate and store UUIDs securely client-side
-- Never expose sensitive user information in API requests
-- Implement authentication and authorization in production environments
+**Authentication & Authorization**:
+- Implement JWT (JSON Web Tokens) or OAuth2 for user authentication
+- Use role-based access control (RBAC) for different user permissions
+- Secure API endpoints with authentication middleware
+- Implement session management and token refresh mechanisms
+- Use HTTPS in production to encrypt data in transit
+- Store sensitive credentials in environment variables (never in code)
 
-**Data Integrity**:
-- Validate responses before processing
-- Handle edge cases (concurrent bookings, deleted resources)
-- Implement transaction handling for critical operations
+**Input Validation & Sanitization**:
+- Validate all input data on both client and server side
+- Sanitize user inputs to prevent injection attacks (SQL, NoSQL, XSS)
+- Use DTOs (Data Transfer Objects) with class-validator for automatic validation
+- Implement rate limiting to prevent abuse and DDoS attacks
+- Validate UUID formats and data types before processing
+
+**Data Protection**:
+- Encrypt sensitive data at rest (database encryption)
+- Use parameterized queries to prevent SQL injection
+- Implement proper error handling without exposing sensitive information
+- Log security events without exposing user credentials
+- Follow GDPR/privacy regulations for user data handling
+- Implement data retention and deletion policies
+
+**Secure Coding Practices**:
+- Never expose database credentials or API keys in code
+- Use environment variables for configuration
+- Implement CORS (Cross-Origin Resource Sharing) policies
+- Use Content Security Policy (CSP) headers
+- Regularly update dependencies to patch security vulnerabilities
+- Implement security headers (X-Content-Type-Options, X-Frame-Options)
+- Use secure password hashing algorithms (bcrypt, Argon2) if implementing authentication
+
+**Vulnerability Prevention**:
+- Protect against common vulnerabilities (OWASP Top 10)
+- Implement CSRF (Cross-Site Request Forgery) protection
+- Validate file uploads if implementing file storage
+- Use prepared statements for database queries
+- Implement proper logging and monitoring for security incidents
 
 ### Development Workflow
 
