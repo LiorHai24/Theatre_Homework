@@ -7,7 +7,7 @@ Hi, I'm Lior, a 27-year-old software developer passionate about building scalabl
 ## Development Tools & Quality Assurance
 
 ### AI Agent Testing Hooks
-This project includes hooks for AI agent testing that enable automated code review and testing workflows. These hooks allow AI agents to:
+Hooks for AI agent testing enable automated code review and testing workflows. These hooks allow AI agents to:
 - Perform automated code quality checks
 - Validate API endpoints and business logic
 - Run comprehensive test suites
@@ -104,7 +104,7 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 #### Get All Movies
 - **Endpoint**: `GET /movies/all`
-- **Description**: Retrieves all movies in the system.
+- **Description**: Retrieves all movies.
 - **Response** (200 OK): Array of movie objects
     ```json
     [
@@ -213,7 +213,7 @@ Popcorn Palace is a movie theater booking system that enables users to manage mo
 
 #### Get All Theaters
 - **Endpoint**: `GET /showtimes/theater/all`
-- **Description**: Retrieves all theaters in the system.
+- **Description**: Retrieves all theaters.
 - **Response** (200 OK): Array of theater objects
     ```json
     [
