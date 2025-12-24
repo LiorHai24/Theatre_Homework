@@ -629,6 +629,116 @@ All API endpoints are relative to the base URL:
 - **Development**: `http://localhost:3000`
 - **Production**: Configure according to your deployment environment
 
+## Troubleshooting
+
+This section addresses common issues and their solutions:
+
+### Database Connection Issues
+
+**Problem**: Application fails to connect to PostgreSQL database.
+
+**Solutions**:
+1. Verify Docker container is running:
+   ```bash
+   docker ps
+   ```
+   If the container is not running, start it:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. Check database credentials in `src/app.module.ts`:
+   - Ensure username, password, and database name match `compose.yml` configuration
+   - Default credentials: `popcorn-palace` / `popcorn-palace`
+
+3. Verify PostgreSQL is listening on port 5432:
+   ```bash
+   docker-compose logs db
+   ```
+
+### Port Already in Use
+
+**Problem**: Error message indicating port 3000 is already in use.
+
+**Solutions**:
+1. Find and stop the process using port 3000:
+   ```bash
+   # Windows
+   netstat -ano | findstr :3000
+   taskkill /PID <PID> /F
+   
+   # Linux/Mac
+   lsof -ti:3000 | xargs kill -9
+   ```
+
+2. Change the application port in `src/main.ts`:
+   ```typescript
+   await app.listen(3001); // Use a different port
+   ```
+
+### TypeORM Synchronization Warnings
+
+**Problem**: Database schema synchronization warnings or errors.
+
+**Solutions**:
+1. Ensure `synchronize: true` is set in development (see `src/app.module.ts`)
+2. For production, use migrations instead of synchronization
+3. Verify entity decorators are correctly defined
+4. Check that all required relations are properly configured
+
+### Test Failures
+
+**Problem**: Tests are failing or not running correctly.
+
+**Solutions**:
+1. Clear Jest cache:
+   ```bash
+   npm test -- --clearCache
+   ```
+
+2. Ensure database is running before executing tests:
+   ```bash
+   docker-compose up -d
+   npm test
+   ```
+
+3. Check that mock repositories are properly configured in test files
+4. Verify all required dependencies are installed:
+   ```bash
+   npm install
+   ```
+
+### Module Import Errors
+
+**Problem**: TypeScript errors related to module imports or missing dependencies.
+
+**Solutions**:
+1. Reinstall dependencies:
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+2. Verify TypeScript configuration in `tsconfig.json`
+3. Check that all required NestJS modules are properly imported in feature modules
+4. Ensure entity relationships are correctly defined with proper imports
+
+### Booking Validation Errors
+
+**Problem**: Booking creation fails with validation errors.
+
+**Common Causes**:
+- Invalid UUID format for `userId` (must be valid UUID v4)
+- Seat number exceeds theater capacity
+- Showtime has no available seats
+- Seat is already booked for the specified showtime
+
+**Solutions**:
+1. Validate UUID format before sending requests
+2. Check theater capacity before selecting seat numbers
+3. Verify showtime availability before attempting to book
+4. Use `GET /showtimes/{id}` to check current available seats
+
 ## Cleanup
 
 ```bash
