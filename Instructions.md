@@ -658,15 +658,17 @@ $ docker-compose up -d
 ## Running the App
 
 ```bash
-# Development mode
+# Development mode (single run)
 $ npm run start
 
-# Watch mode
+# Watch mode (auto-reload on file changes - recommended for development)
 $ npm run start:dev
 
-# Production mode
+# Production mode (compiled JavaScript)
 $ npm run start:prod
 ```
+
+> **Tip**: Use `npm run start:dev` during development for automatic reloading when you make code changes.
 
 ## Testing
 
